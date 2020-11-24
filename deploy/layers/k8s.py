@@ -19,5 +19,6 @@ class KubernetesClusterLayer(core.Construct):
       vpc=vpc,
       default_capacity=0,
       secrets_encryption_key=self.encryptionKey,
-      endpoint_access= eks.EndpointAccess.PRIVATE
+      endpoint_access= eks.EndpointAccess.PRIVATE,
+      vpc_subnets= [ec2.SubnetSelection(subnet_group_name='Kubes')]
     )
