@@ -3,6 +3,7 @@ import os.path
 from aws_cdk.core import App, Stack, Environment
 from layers.images import BuildImagesLayer
 from layers.buckets import BucketLayer
+from layers.pipeline import CodePipelineLayer
 src_root_dir = os.path.join(os.path.dirname(__file__),"..")
 
 default_env= Environment(region="us-east-1")

@@ -1,6 +1,7 @@
 virtualenv
 aws-cdk.aws_codebuild
 aws-cdk.aws_codepipeline
+aws-cdk.aws_codepipeline-actions
 aws-cdk.aws_ecr
 aws-cdk.aws_ecr_assets
 aws-cdk.aws-s3
