@@ -34,10 +34,18 @@ class EarningsApiLayer(core.Construct):
       server_side_encryption=True
     )
 
+    deps_layer = lambda_.LayerVersion(self, 'FlaskFunction-Deps',
+      code = lambda_.Code.from_bucket(
+        bucket=code_bucket, 
+        key='artifacts/Earnings-DataServices/bin/deps.zip'),
+      compatible_runtimes= [ lambda_.Runtime.PYTHON_3_8],
+      description='Runtime dependencies for EarningsApi')
+
     self.flask_lambda = lambda_.Function(self, 'FlaskFunction',
       handler='webapp.app',
-      code= lambda_.Code.from_bucket(bucket=code_bucket, key='artifacts/earnings.zip'),
-      timeout= core.Duration.minutes(1),      
+      code= lambda_.Code.from_bucket(bucket=code_bucket, key='artifacts/code'),
+      timeout= core.Duration.minutes(1),
+      layers=[ deps_layer ],
       tracing= lambda_.Tracing.ACTIVE,
       runtime = lambda_.Runtime.PYTHON_3_8,
       vpc= context.networking.vpc,
