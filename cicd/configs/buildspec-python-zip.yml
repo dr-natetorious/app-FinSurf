@@ -7,7 +7,7 @@ phases:
       - mkdir -p /artifacts/bin
       - pip install -r requirements.txt -t /out/python
       - cp *.py /artifacts/code/
-  after_build:
+  post_build:
     commands:
       - cd /out
       - zip -r /artifacts/bin/deps.zip .
