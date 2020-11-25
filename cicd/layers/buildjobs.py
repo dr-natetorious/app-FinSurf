@@ -23,14 +23,15 @@ class BuildJobLayer(core.Construct):
       description='FinSurf code building account',
       managed_policies=[iam.ManagedPolicy.from_aws_managed_policy_name("AWSCodeBuildAdminAccess")])
 
-    self.python_projects = [
-      BuildPythonZip(self,'Earnings-DataServices',
-        project_name='Earnings-DataServices',
-        buckets=buckets,
-        build_role=self.build_role,
-        app_dir='src/earnings',
-        output_name='earnings.zip')
-    ]
+    self.python_projects = {
+      'Earnings-DataServices':
+        BuildPythonZip(self,'Earnings-DataServices',
+          project_name='Earnings-DataServices',
+          buckets=buckets,
+          build_role=self.build_role,
+          app_dir='src/earnings',
+          output_name='earnings.zip')
+    }
 
 class BuildPythonZip(core.NestedStack):
   """

@@ -63,9 +63,9 @@ class CodePipelineLayer(core.Construct):
       actions =[ 
         actions.CodeBuildAction(
           input=sourceOutput,
-          project=x.build_project,
-          action_name='x.build_project.project_name'
-        ) for x in build_jobs.python_projects
+          project=build_jobs.python_projects[key].build_project,
+          action_name='Build_'+key
+        ) for key in build_jobs.python_projects.keys()
       ]
     )
 
