@@ -4,9 +4,8 @@ phases:
   build:
     commands:
       - cd $APP_DIR
-      - mkdir -p /artifacts/bin /artifacts/code/
-      - pip install -r requirements.txt -t /out/python
       - zip -r /artifacts/code/app.zip .
+      - pip install -r requirements.txt -t /out/python
   post_build:
     commands:
       - cd /out
