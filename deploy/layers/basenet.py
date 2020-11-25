@@ -21,7 +21,6 @@ class BaseNetworkingLayer(core.Construct):
       max_azs=2,
       subnet_configuration= [
         ec2.SubnetConfiguration(name='Egress', subnet_type=ec2.SubnetType.PUBLIC, cidr_mask=28),
-        ec2.SubnetConfiguration(name='Kubes',subnet_type= ec2.SubnetType.PRIVATE, cidr_mask=21),
         ec2.SubnetConfiguration(name='EarningApi',subnet_type= ec2.SubnetType.PRIVATE, cidr_mask=24),
       ]
     )
