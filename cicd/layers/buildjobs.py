@@ -25,6 +25,12 @@ class BuildJobLayer(core.Construct):
       description='FinSurf code building account',
       managed_policies=[iam.ManagedPolicy.from_aws_managed_policy_name("AWSCodeBuildAdminAccess")])
 
+    # Create project for infrastructure
+    self.cdk_infra_project = DeployInfraJob(self,'DeployInfra',
+      build_image = build_images.cdk_deploy,
+      build_role=self.build_role)
+
+    # Configure all python build jobs here.
     self.python_projects = {
       'Earnings-DataServices':
         BuildPythonZip(self,'Earnings-DataServices',
@@ -34,7 +40,7 @@ class BuildJobLayer(core.Construct):
           build_role=self.build_role,
           app_dir='src/earnings',
           output_name='earnings.zip')
-    }
+    }    
 
 class BuildPythonZip(core.Construct):
   """
@@ -73,3 +79,32 @@ class BuildPythonZip(core.Construct):
         include_build_id=False,
         package_zip=True)
       )
+
+class DeployInfraJob(core.Construct):
+  """
+  Runs cdk automation
+  """
+  def __init__(self, scope: core.Construct, id: str,build_image:assets.DockerImageAsset,build_role:iam.Role, **kwargs) -> None:
+    super().__init__(scope, id, **kwargs)
+    
+    self.github_master_source = b.Source.git_hub(
+      clone_depth=1,
+      owner='dr-natetorious',
+      repo='app-FinSurf',
+      webhook=False
+    )
+
+    self.build_project = b.Project(self, 'DeployInfra',
+      project_name='Deploy-FinSurf-Infra',
+      source= self.github_master_source,
+      environment= b.BuildEnvironment(
+        build_image= b.LinuxBuildImage.from_ecr_repository(
+          repository=build_image.repository,
+          tag=build_image.image_uri.split(':')[-1]),
+        environment_variables={
+        },
+        compute_type=b.ComputeType.SMALL
+      ),
+      role=build_role,
+      build_spec= b.BuildSpec.from_source_filename(filename='cicd/configs/buildspec-cdk-infra.yml'),
+    )
