@@ -1,4 +1,4 @@
-from datasources import WebEarningCalendar
+from rttnewsclient import RttNewsEarningsClient
 from json import dumps
 
 def init_flask_for_env():
@@ -14,7 +14,7 @@ def init_flask_for_env():
     return FlaskLambda(__name__)
 
 app = init_flask_for_env()
-calendar = WebEarningCalendar()
+calendar = RttNewsEarningsClient()
 
 @app.route('/heartbeat')
 def hello_world():
@@ -22,4 +22,4 @@ def hello_world():
 
 @app.route('/<date_str>')
 def fetch_by_date(date_str):
-  return dumps(calendar.get_for_date(date_str=date_str))
+  return dumps([x.to_hash() for x in calendar.get_for_date(date_str=date_str)])

@@ -25,13 +25,32 @@ class EarningsApiLayer(core.Construct):
       self, 'code_bucket',
       bucket_name=bucket_name)
 
+    self.cache_table = d.Table(self,'EarningCalendarCache',
+      table_name='FinSurf-Earnings',
+      billing_mode= d.BillingMode.PAY_PER_REQUEST,
+      partition_key=d.Attribute(name='PartitionKey', type=d.AttributeType.STRING),
+      sort_key= d.Attribute(name='SortKey', type=d.AttributeType.STRING),
+      time_to_live_attribute= d.Attribute(name='Expiration', type= d.AttributeType.NUMBER),
+      encryption_key=self.encryption_key,
+      server_side_encryption=True
+    )
+
     self.flask_lambda = lambda_.Function(self, 'FlaskFunction',
       handler='webapp.app',
       code= lambda_.Code.from_bucket(bucket=code_bucket, key='artifacts/earnings.zip'),
       timeout= core.Duration.minutes(1),
       tracing= lambda_.Tracing.ACTIVE,
       runtime = lambda_.Runtime.PYTHON_3_8,
-      environment={})
+      environment={
+        'CACHE_TABLE': self.cache_table.table_name
+      })
+
+    self.flask_lambda.add_to_role_policy(
+      statement= iam.PolicyStatement(
+        actions=["dynamodb:*"],
+        effect=iam.Effect.ALLOW,
+        resources=[self.cache_table.table_arn]
+      ))
 
     self.rest_api = a.LambdaRestApi(self,'EarningsApi',
       handler=self.flask_lambda,
@@ -41,13 +60,4 @@ class EarningsApiLayer(core.Construct):
     self.encryption_key = kms.Key(self,'EncryptionKey',
       alias='finsurf/earnings',
       description='Encryption key for Earnings feature',
-      enable_key_rotation=True)
-
-    self.cache_table = d.Table(self,'EarningCalendarCache',
-      table_name='FinSurf-Earnings',
-      billing_mode= d.BillingMode.PAY_PER_REQUEST,
-      partition_key=d.Attribute(name='PartitionKey', type=d.AttributeType.STRING),
-      sort_key= d.Attribute(name='SortKey', type=d.AttributeType.STRING),
-      time_to_live_attribute= d.Attribute(name='Expiration', type= d.AttributeType.NUMBER),
-      encryption_key=self.encryption_key
-    )
+      enable_key_rotation=True)    

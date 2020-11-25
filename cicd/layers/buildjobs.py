@@ -36,7 +36,7 @@ class BuildJobLayer(core.Construct):
           output_name='earnings.zip')
     }
 
-class BuildPythonZip(core.NestedStack):
+class BuildPythonZip(core.Construct):
   """
   Configure and deploy the network
   """
@@ -54,7 +54,9 @@ class BuildPythonZip(core.NestedStack):
       project_name=project_name,
       source= self.github_master_source,
       environment= b.BuildEnvironment(
-        build_image= b.LinuxBuildImage.from_ecr_repository(repository=build_image.repository),
+        build_image= b.LinuxBuildImage.from_ecr_repository(
+          repository=build_image.repository,
+          tag=build_image.image_uri.split(':')[-1]),
         environment_variables={
           'APP_DIR':b.BuildEnvironmentVariable(value=app_dir)
         },

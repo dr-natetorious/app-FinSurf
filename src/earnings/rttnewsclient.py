@@ -1,9 +1,11 @@
 import requests
 import calendar
+import typing
+from models import EarningReport
 from datetime import datetime
 from bs4 import BeautifulSoup
 
-class WebEarningCalendar:
+class RttNewsEarningsClient:
 
   def __init__(self, base_url:str='https://www.rttnews.com/Calendar/Earnings.aspx'):
     """
@@ -11,7 +13,7 @@ class WebEarningCalendar:
     """
     self.__base_url = base_url
 
-  def get_for_date(self, date:datetime=None, date_str=None) -> list:
+  def get_for_date(self, date:datetime=None, date_str:str=None) -> typing.List[EarningReport]:
     """
     Gets the information for a given date.
     """
@@ -25,7 +27,7 @@ class WebEarningCalendar:
     data_table = self.__parse_url(url)
     return data_table
 
-  def __parse_url(self, url):
+  def __parse_url(self, url) -> typing.List[EarningReport]:
     """
     Fetches and parses the requested url.
     """
@@ -57,14 +59,14 @@ class WebEarningCalendar:
 
     data_table = []
     for ix in range(0,len(symbols)):
-      data_table.append({
-        'symbol': symbols[ix],
-        'period': periods[ix],
-        'eps_est': WebEarningCalendar.__clean_price(est[ix]),
-        'eps_last_year': WebEarningCalendar.__clean_price(previous[ix]),
-        'eps_actual': WebEarningCalendar.__clean_price(actual[ix]),
-        'time': time[ix]
-      })
+      data_table.append(EarningReport(
+        symbol= symbols[ix],
+        period= periods[ix],
+        eps_est= RttNewsEarningsClient.__clean_price(est[ix]),
+        eps_last_year= RttNewsEarningsClient.__clean_price(previous[ix]),
+        eps_actual= RttNewsEarningsClient.__clean_price(actual[ix]),
+        time= time[ix]
+      ))
 
     return data_table
 
