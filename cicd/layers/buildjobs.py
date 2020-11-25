@@ -23,12 +23,14 @@ class BuildJobLayer(core.Construct):
       description='FinSurf code building account',
       managed_policies=[iam.ManagedPolicy.from_aws_managed_policy_name("AWSCodeBuildAdminAccess")])
 
-    BuildPythonZip(self,'Earnings-DataServices',
-      project_name='Earnings-DataServices',
-      buckets=buckets,
-      build_role=self.build_role,
-      app_dir='src/earnings',
-      output_name='earnings.zip')
+    self.python_projects = [
+      BuildPythonZip(self,'Earnings-DataServices',
+        project_name='Earnings-DataServices',
+        buckets=buckets,
+        build_role=self.build_role,
+        app_dir='src/earnings',
+        output_name='earnings.zip')
+    ]
 
 class BuildPythonZip(core.NestedStack):
   """
@@ -44,7 +46,7 @@ class BuildPythonZip(core.NestedStack):
       webhook=False
     )
 
-    self.earnings_project = b.Project(self,'PythonProject',
+    self.build_project = b.Project(self,'PythonProject',
       project_name=project_name,
       source= self.github_master_source,
       environment= b.BuildEnvironment(

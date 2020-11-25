@@ -13,10 +13,7 @@ def create_infra_stack(infra_stack):
     build_images  = BuildImagesLayer(infra_stack, "BuildImages")
     buckets = BucketLayer(infra_stack, 'Buckets')
     build_jobs = BuildJobLayer(infra_stack, 'BuildJobs', buckets=buckets)
-    #datastores = DataStorageLayer(infra_stack, 'DataStores')
-    #streaming = KinesisLayer(infra_stack, 'Streaming')
-    #processors = LambdaLayer(infra_stack, 'Processors', stream=streaming.kinesis, auditTable=datastores.auditTable)
-    #api = ApiLayer(infra_stack,'Api',stream=streaming.kinesis)
+    pipelines = CodePipelineLayer(infra_stack,'CodePipelines', buckets=buckets,build_jobs=build_jobs)
 
 app = App()
 infra_stack = Stack(app,'FinSurfBuilder', env=default_env)
