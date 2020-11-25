@@ -4,15 +4,16 @@ phases:
   build:
     commands:
       - cd $APP_DIR
-      - zip -r /artifacts/code/app.zip .
+      - mkdir -p /artifacts
+      - zip -r /artifacts/app.zip .
       - pip install -r requirements.txt -t /out/python
   post_build:
     commands:
       - cd /out
-      - zip -r /artifacts/bin/deps.zip .
+      - zip -r /artifacts/deps.zip .
 
 artifacts:
   files:
     - "**/*"
   base-directory: /artifacts
-  discard-paths: no
+  discard-paths: yes
