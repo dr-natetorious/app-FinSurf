@@ -2,7 +2,6 @@
 from aws_cdk import (
   core,
   aws_s3 as s3,
-  aws_kms as kms,
   aws_apigateway as a,
   aws_dynamodb as d,
   aws_lambda as lambda_,
@@ -31,7 +30,6 @@ class EarningsApiLayer(core.Construct):
       partition_key=d.Attribute(name='PartitionKey', type=d.AttributeType.STRING),
       sort_key= d.Attribute(name='SortKey', type=d.AttributeType.STRING),
       time_to_live_attribute= d.Attribute(name='Expiration', type= d.AttributeType.NUMBER),
-      encryption_key=self.encryption_key,
       server_side_encryption=True
     )
 
@@ -56,8 +54,3 @@ class EarningsApiLayer(core.Construct):
       handler=self.flask_lambda,
       proxy=True,
       description='The FinSurf Earnings API')
-
-    self.encryption_key = kms.Key(self,'EncryptionKey',
-      alias='finsurf/earnings',
-      description='Encryption key for Earnings feature',
-      enable_key_rotation=True)    

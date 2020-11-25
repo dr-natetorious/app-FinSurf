@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+from context import BuildContext
 from layers.buckets import BucketLayer
 from layers.images import BuildImagesLayer
 from aws_cdk import (
@@ -7,7 +8,6 @@ from aws_cdk import (
   aws_codebuild as b,
   aws_iam as iam,
   aws_s3 as s3,
-  aws_kms as kms,
   aws_ecr_assets as assets,
 )
 
@@ -17,7 +17,7 @@ class BuildJobLayer(core.Construct):
   """
   Configure and deploy the network
   """
-  def __init__(self, scope: core.Construct, id: str, build_images:BuildImagesLayer, buckets:BucketLayer, **kwargs) -> None:
+  def __init__(self, scope: core.Construct, id: str, context:BuildContext, **kwargs) -> None:
     super().__init__(scope, id, **kwargs)
 
     self.build_role = iam.Role(self,'CodeBuildRole',
@@ -27,7 +27,7 @@ class BuildJobLayer(core.Construct):
 
     # Create project for infrastructure
     self.cdk_infra_project = DeployInfraJob(self,'DeployInfra',
-      build_image = build_images.cdk_deploy,
+      build_image = context.build_images.cdk_deploy,
       build_role=self.build_role)
 
     # Configure all python build jobs here.
@@ -35,8 +35,8 @@ class BuildJobLayer(core.Construct):
       'Earnings-DataServices':
         BuildPythonZip(self,'Earnings-DataServices',
           project_name='Earnings-DataServices',
-          buckets=buckets,
-          build_image = build_images.python_build,
+          context=context,
+          build_image = context.build_images.python_build,
           build_role=self.build_role,
           app_dir='src/earnings',
           output_name='earnings.zip')
@@ -46,7 +46,13 @@ class BuildPythonZip(core.Construct):
   """
   Configure and deploy the network
   """
-  def __init__(self, scope: core.Construct, id: str, project_name:str,build_image:assets.DockerImageAsset, buckets:BucketLayer, build_role:iam.Role,app_dir:str,output_name:str, **kwargs) -> None:
+  def __init__(self, scope: core.Construct, id: str, 
+    project_name:str,
+    build_image:assets.DockerImageAsset, 
+    context:BuildContext, 
+    build_role:iam.Role,
+    app_dir:str,output_name:str, **kwargs) -> None:
+
     super().__init__(scope, id, **kwargs)
 
     self.github_master_source = b.Source.git_hub(
@@ -69,12 +75,12 @@ class BuildPythonZip(core.Construct):
         compute_type=b.ComputeType.SMALL
       ),
       role=build_role,
-      encryption_key= buckets.artifacts_key,
+      encryption_key= context.buckets.artifacts_key,
       build_spec= b.BuildSpec.from_source_filename(filename='cicd/configs/buildspec-python-zip.yml'),
       artifacts= b.Artifacts.s3(
         name=output_name,
         path="/artifacts",
-        bucket=buckets.artifacts_bucket,
+        bucket=context.buckets.artifacts_bucket,
         encryption=True,
         include_build_id=False,
         package_zip=True)
@@ -84,7 +90,9 @@ class DeployInfraJob(core.Construct):
   """
   Runs cdk automation
   """
-  def __init__(self, scope: core.Construct, id: str,build_image:assets.DockerImageAsset,build_role:iam.Role, **kwargs) -> None:
+  def __init__(self, scope: core.Construct, id: str, 
+    build_image:assets.DockerImageAsset,
+    build_role:iam.Role, **kwargs) -> None:
     super().__init__(scope, id, **kwargs)
     
     self.github_master_source = b.Source.git_hub(

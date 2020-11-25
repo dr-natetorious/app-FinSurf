@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 import os
+from context import BuildContext
 from aws_cdk import (
   core,
   aws_s3 as s3,
-  aws_kms as kms,
   aws_ssm as ssm,
 )
 
@@ -13,13 +13,10 @@ class BucketLayer(core.Construct):
   """
   Configure and deploy the network
   """
-  def __init__(self, scope: core.Construct, id: str, **kwargs) -> None:
+  def __init__(self, scope: core.Construct, id: str, context:BuildContext, **kwargs) -> None:
     super().__init__(scope, id, **kwargs)
     
-    self.artifacts_key = kms.Key(self,'ArtifactKey',
-      alias='build/artifacts',
-      description='Encryption key for FinSurf build artifacts',
-      enable_key_rotation=True)
+    self.artifacts_key = context.encryption_keys.build_key
 
     self.artifacts_bucket = s3.Bucket(self,'FinSurfBuildArtifacts',
       block_public_access= s3.BlockPublicAccess.BLOCK_ALL,

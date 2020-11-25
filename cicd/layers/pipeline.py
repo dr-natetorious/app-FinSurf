@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+from context import BuildContext
 from layers.buckets import BucketLayer
 from layers.buildjobs import BuildJobLayer
 from aws_cdk import (
@@ -17,7 +18,7 @@ class CodePipelineLayer(core.Construct):
   """
   Configure and deploy the network
   """
-  def __init__(self, scope: core.Construct, id: str, build_jobs: BuildJobLayer, **kwargs) -> None:
+  def __init__(self, scope: core.Construct, id: str, context:BuildContext, **kwargs) -> None:
     super().__init__(scope, id, **kwargs)
    
 
@@ -27,6 +28,7 @@ class CodePipelineLayer(core.Construct):
 
     self.core_pipeline = p.Pipeline(self, 'CorePipeline',
       pipeline_name='FinSurf-CorePipeline',
+      artifact_bucket= context.buckets.artifact_bucket,
       role=role)
 
     # # Add trigger
@@ -38,8 +40,7 @@ class CodePipelineLayer(core.Construct):
           action_name='Init-from-GitHub',
           owner='dr-natetorious',
           repo='app-FinSurf',
-          oauth_token=core.SecretValue.secrets_manager('GithubPersonalAccessToken',json_field='GitHubPersonalAccessToken'),
-          #oauth_token=core.SecretValue.ssm_secure(parameter_name='GithubPersonalAccessToken',version='2'),
+          oauth_token=core.SecretValue.secrets_manager('GithubPersonalAccessToken',json_field='GitHubPersonalAccessToken'),          
           output=github_init_artifact
         )
       ])
@@ -50,9 +51,9 @@ class CodePipelineLayer(core.Construct):
       actions =[ 
         actions.CodeBuildAction(
           input=github_init_artifact,
-          project=build_jobs.python_projects[key].build_project,
+          project=context.build_projects.python_projects[key].build_project,
           action_name='Build_'+key
-        ) for key in build_jobs.python_projects.keys()
+        ) for key in context.build_projects.python_projects.keys()
       ]
     )
 
