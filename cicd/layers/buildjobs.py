@@ -38,16 +38,14 @@ class BuildJobLayer(core.Construct):
           context=context,
           build_image = context.build_images.python_build,
           build_role=self.build_role,
-          app_dir='src/earnings',
-          output_name='earnings.zip'),
+          app_dir='src/earnings'),
       'Alexa-Skill':
         BuildPythonZip(self,'Alexa-Skill',
           project_name='FinSurf-Alexa-Skill',
           context=context,
           build_image = context.build_images.python_build,
           build_role=self.build_role,
-          app_dir='src/alexa-skill',
-          output_name='finsurf-alexa-skill.zip')
+          app_dir='src/alexa-skill')
     }    
 
 class BuildPythonZip(core.Construct):
@@ -59,7 +57,7 @@ class BuildPythonZip(core.Construct):
     build_image:assets.DockerImageAsset, 
     context:BuildContext, 
     build_role:iam.Role,
-    app_dir:str,output_name:str, **kwargs) -> None:
+    app_dir:str, **kwargs) -> None:
 
     super().__init__(scope, id, **kwargs)
 
@@ -86,7 +84,7 @@ class BuildPythonZip(core.Construct):
       encryption_key= context.buckets.artifacts_key,
       build_spec= b.BuildSpec.from_source_filename(filename='cicd/configs/buildspec-python-zip.yml'),
       artifacts= b.Artifacts.s3(
-        name=output_name,
+        name=project_name,
         path="/artifacts",
         bucket=context.buckets.artifacts_bucket,
         encryption=True,
