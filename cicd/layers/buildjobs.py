@@ -45,6 +45,9 @@ class BuildJobLayer(core.Construct):
       source= self.github_master_source,
       environment= b.BuildEnvironment(
         build_image= b.LinuxBuildImage.from_docker_registry(name='python:3.8'),
+        environment_variables={
+          'APP_DIR', b.BuildEnvironmentVariable(value='/src/earnings')
+        },
         compute_type=b.ComputeType.SMALL),
       role=self.build_role,
       encryption_key= buckets.artifacts_key,
