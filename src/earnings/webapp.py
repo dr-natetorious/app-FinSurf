@@ -1,8 +1,19 @@
-from flask import Flask
 from datasources import WebEarningCalendar
 from json import dumps
 
-app = Flask(__name__)
+def init_flask_for_env():
+  """
+  Loads flask for lambda or local debug.
+  """
+  from os import environ
+  if 'LOCAL_DEBUG' in environ:
+    from flask import Flask
+    return Flask(__name__)
+  else:
+    from flask_lambda import FlaskLambda
+    return FlaskLambda(__name__)
+
+app = init_flask_for_env()
 calendar = WebEarningCalendar()
 
 @app.route('/heartbeat')

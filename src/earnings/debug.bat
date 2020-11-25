@@ -7,6 +7,7 @@
 @SETLOCAL enableextensions enabledelayedexpansion
 @SET base_path=%~dp0
 
+@SET LOCAL_DEBUG=true
 @SET FLASK_APP=webapp.py
 @SET FLASK_ENV=development
 
