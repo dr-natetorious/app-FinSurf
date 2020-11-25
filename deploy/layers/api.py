@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-#from context import InfraContext
+from context import InfraContext
 from aws_cdk import (
   core,
   aws_s3 as s3,
+  aws_ec2 as ec2,
   aws_apigateway as a,
   aws_dynamodb as d,
   aws_lambda as lambda_,
@@ -16,7 +17,7 @@ class EarningsApiLayer(core.Construct):
   """
   Configure and deploy the network
   """
-  def __init__(self, scope: core.Construct, id: str, context, **kwargs) -> None:
+  def __init__(self, scope: core.Construct, id: str, context:InfraContext, **kwargs) -> None:
     super().__init__(scope, id, **kwargs)
 
     bucket_arn = ssm.StringParameter.from_string_parameter_name(self,'artifact_bucket',
@@ -39,6 +40,8 @@ class EarningsApiLayer(core.Construct):
       timeout= core.Duration.minutes(1),      
       tracing= lambda_.Tracing.ACTIVE,
       runtime = lambda_.Runtime.PYTHON_3_8,
+      vpc= context.networking.vpc,
+      vpc_subnets=ec2.SubnetSelection(subnet_group_name='EarningApi'),
       environment={
         'CACHE_TABLE': self.cache_table.table_name
       })

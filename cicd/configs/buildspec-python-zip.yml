@@ -4,8 +4,9 @@ phases:
   build:
     commands:
       - cd $APP_DIR
-      - pip install -r requirements.txt -t /artifacts/python
-      - cp *.py /artifacts
+      - pip install -r requirements.txt -t /out/python
+      - pushd /out && zip -r /artifacts/bin/deps.zip . && popd
+      - cp *.py /artifacts/code/
 artifacts:
   files:
     - "**/*"

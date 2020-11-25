@@ -91,7 +91,7 @@ class BuildPythonZip(core.Construct):
         bucket=context.buckets.artifacts_bucket,
         encryption=True,
         include_build_id=False,
-        package_zip=True)
+        package_zip=False)
       )
 
 class DeployInfraJob(core.Construct):
