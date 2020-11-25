@@ -4,7 +4,7 @@ phases:
   build:
     commands:
       - cd $APP_DIR
-      - mkdir -p /artifacts/bin
+      - mkdir -p /artifacts/bin /artifacts/code/
       - pip install -r requirements.txt -t /out/python
       - cp *.py /artifacts/code/
   post_build:
