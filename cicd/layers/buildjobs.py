@@ -52,7 +52,7 @@ class BuildJobLayer(core.Construct):
       ),
       role=self.build_role,
       encryption_key= buckets.artifacts_key,
-      build_spec= b.BuildSpec.from_source_filename(filename='src/earnings/buildspec.yml'),
+      build_spec= b.BuildSpec.from_source_filename(filename='cicd/configs/buildspec-python-zip.yml'),
       artifacts= b.Artifacts.s3(
         name="earnings.zip",
         path="/artifacts",
