@@ -46,17 +46,18 @@ class BuildJobLayer(core.Construct):
       environment= b.BuildEnvironment(
         build_image= b.LinuxBuildImage.from_docker_registry(name='python:3.8'),
         environment_variables={
-          'APP_DIR', b.BuildEnvironmentVariable(value='/src/earnings')
+          'APP_DIR':b.BuildEnvironmentVariable(value='src/earnings')
         },
-        compute_type=b.ComputeType.SMALL),
+        compute_type=b.ComputeType.SMALL
+      ),
       role=self.build_role,
       encryption_key= buckets.artifacts_key,
       build_spec= b.BuildSpec.from_source_filename(filename='src/earnings/buildspec.yml'),
       artifacts= b.Artifacts.s3(
-        identifier='Primary-Artifacts',
+        name="earnings.zip",
+        path="/artifacts",
         bucket=buckets.artifacts_bucket,
         encryption=True,
-        path='/artifacts',
         include_build_id=False,
         package_zip=True)
       )

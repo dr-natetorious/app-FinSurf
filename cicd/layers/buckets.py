@@ -22,6 +22,7 @@ class BucketLayer(core.Construct):
 
     self.artifacts_bucket = s3.Bucket(self,'FinSurfBuildArtifacts',
       block_public_access= s3.BlockPublicAccess.BLOCK_ALL,
+      versioned=True,
       encryption= s3.BucketEncryption.KMS,
       encryption_key= self.artifacts_key 
     )
