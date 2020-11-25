@@ -6,8 +6,12 @@ phases:
       - cd $APP_DIR
       - mkdir -p /artifacts/bin
       - pip install -r requirements.txt -t /out/python
-      - pushd /out && zip -r /artifacts/bin/deps.zip . && popd
       - cp *.py /artifacts/code/
+  after_build:
+    commands:
+      - cd /out
+      - zip -r /artifacts/bin/deps.zip .
+
 artifacts:
   files:
     - "**/*"
