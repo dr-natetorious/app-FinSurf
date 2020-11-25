@@ -39,7 +39,15 @@ class BuildJobLayer(core.Construct):
           build_image = context.build_images.python_build,
           build_role=self.build_role,
           app_dir='src/earnings',
-          output_name='earnings.zip')
+          output_name='earnings.zip'),
+      'Alexa-Skill':
+        BuildPythonZip(self,'Alexa-Skill',
+          project_name='FinSurf-Alexa-Skill',
+          context=context,
+          build_image = context.build_images.python_build,
+          build_role=self.build_role,
+          app_dir='src/alexa-skill',
+          output_name='finsurf-alexa-skill.zip')
     }    
 
 class BuildPythonZip(core.Construct):

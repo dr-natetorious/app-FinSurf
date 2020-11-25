@@ -21,7 +21,7 @@ class BucketLayer(core.Construct):
     self.artifacts_bucket = s3.Bucket(self,'FinSurfBuildArtifacts',
       block_public_access= s3.BlockPublicAccess.BLOCK_ALL,
       versioned=True,
-      bucket_name='nbachmei.finsurf.us-east-1',
+      bucket_name='nbachmei.finsurf.'+ context.environment.region,
       encryption= s3.BucketEncryption.KMS,
       encryption_key= self.artifacts_key 
     )
