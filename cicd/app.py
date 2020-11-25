@@ -12,8 +12,8 @@ default_env= Environment(region="us-east-1")
 def create_infra_stack(infra_stack):
     build_images  = BuildImagesLayer(infra_stack, "BuildImages")
     buckets = BucketLayer(infra_stack, 'Buckets')
-    build_jobs = BuildJobLayer(infra_stack, 'BuildJobs', buckets=buckets)
-    pipelines = CodePipelineLayer(infra_stack,'CodePipelines', buckets=buckets,build_jobs=build_jobs)
+    build_jobs = BuildJobLayer(infra_stack, 'BuildJobs', build_images=build_images, buckets=buckets)
+    pipelines = CodePipelineLayer(infra_stack,'CodePipelines', build_jobs=build_jobs)
 
 app = App()
 infra_stack = Stack(app,'FinSurfBuilder', env=default_env)

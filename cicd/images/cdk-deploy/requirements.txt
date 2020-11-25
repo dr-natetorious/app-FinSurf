@@ -16,3 +16,4 @@ aws_cdk.aws-dynamodb
 aws_cdk.aws_ses
 aws_cdk.aws_kinesis
 aws_cdk.aws_lambda_event_sources
+aws_cdk.aws_ssm

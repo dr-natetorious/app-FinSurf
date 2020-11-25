@@ -17,7 +17,7 @@ class CodePipelineLayer(core.Construct):
   """
   Configure and deploy the network
   """
-  def __init__(self, scope: core.Construct, id: str, buckets:BucketLayer, build_jobs: BuildJobLayer, **kwargs) -> None:
+  def __init__(self, scope: core.Construct, id: str, build_jobs: BuildJobLayer, **kwargs) -> None:
     super().__init__(scope, id, **kwargs)
    
 
@@ -30,20 +30,7 @@ class CodePipelineLayer(core.Construct):
       role=role)
 
     # # Add trigger
-    sourceOutput = p.Artifact()
-    # self.core_pipeline.add_stage(
-    #   stage_name='Trigger',
-    #   actions=[
-    #     actions.S3SourceAction(
-    #       bucket=buckets.artifacts_bucket,
-    #       bucket_key='does-not-exist',
-    #       output=sourceOutput,
-    #       role=role,
-    #       action_name='Trigger-via-S3'
-    #     )
-    #   ]
-    # )
-
+    github_init_artifact = p.Artifact(artifact_name='github-init-artifact')
     self.core_pipeline.add_stage(
       stage_name='Trigger',
       actions=[
@@ -53,7 +40,7 @@ class CodePipelineLayer(core.Construct):
           repo='app-FinSurf',
           oauth_token=core.SecretValue.secrets_manager('GithubPersonalAccessToken',json_field='GitHubPersonalAccessToken'),
           #oauth_token=core.SecretValue.ssm_secure(parameter_name='GithubPersonalAccessToken',version='2'),
-          output=sourceOutput
+          output=github_init_artifact
         )
       ])
 
@@ -62,7 +49,7 @@ class CodePipelineLayer(core.Construct):
       stage_name='Build-Python-Projects',
       actions =[ 
         actions.CodeBuildAction(
-          input=sourceOutput,
+          input=github_init_artifact,
           project=build_jobs.python_projects[key].build_project,
           action_name='Build_'+key
         ) for key in build_jobs.python_projects.keys()
