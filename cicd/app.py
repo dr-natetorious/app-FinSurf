@@ -17,7 +17,7 @@ def create_infra_stack(infra_stack):
     context.build_images = BuildImagesLayer(infra_stack, 'BuildImages')
     context.buckets = BucketLayer(infra_stack, 'Buckets', context=context)
     context.build_projects = BuildJobLayer(infra_stack, 'BuildJobs', context=context)
-    context.pipelines = CodePipelineLayer(infra_stack,'CodePipelines', context=context)
+    #context.pipelines = CodePipelineLayer(infra_stack,'CodePipelines', context=context)
 
 app = App()
 infra_stack = Stack(app,'FinSurfBuilder', env=default_env)

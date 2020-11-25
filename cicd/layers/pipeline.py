@@ -21,14 +21,13 @@ class CodePipelineLayer(core.Construct):
   def __init__(self, scope: core.Construct, id: str, context:BuildContext, **kwargs) -> None:
     super().__init__(scope, id, **kwargs)
    
-
     role = iam.Role(self,'CodePipeline',
       assumed_by=iam.ServicePrincipal("codepipeline.amazonaws.com"),
       description='Code deployment pipeline for app-FinSurf')
 
-    self.core_pipeline = p.Pipeline(self, 'CorePipeline',
-      pipeline_name='FinSurf-CorePipeline',
-      artifact_bucket= context.buckets.artifact_bucket,
+    self.core_pipeline = p.Pipeline(self, 'cicd-pipeline',
+      pipeline_name='FinSurf-ContInt-ContDep',
+      artifact_bucket= context.buckets.artifacts_bucket,
       role=role)
 
     # # Add trigger

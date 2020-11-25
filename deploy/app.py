@@ -2,10 +2,7 @@
 import os.path
 from aws_cdk.core import App, Stack, Environment
 from layers.basenet import BaseNetworkingLayer
-from layers.datastores import DataStorageLayer
-from layers.kinesis import KinesisLayer
-from layers.processors import LambdaLayer
-from layers.api import ApiLayer
+from layers.api import EarningsApiLayer
 from layers.k8s import KubernetesClusterLayer
 src_root_dir = os.path.join(os.path.dirname(__file__),"..")
 
