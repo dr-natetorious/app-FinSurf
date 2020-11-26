@@ -22,6 +22,7 @@ class BaseNetworkingLayer(core.Construct):
       subnet_configuration= [
         ec2.SubnetConfiguration(name='Egress', subnet_type=ec2.SubnetType.PUBLIC, cidr_mask=28),
         ec2.SubnetConfiguration(name='EarningApi',subnet_type= ec2.SubnetType.PRIVATE, cidr_mask=24),
+        ec2.SubnetConfiguration(name='Alexa',subnet_type= ec2.SubnetType.PRIVATE, cidr_mask=24),
       ]
     )
 
