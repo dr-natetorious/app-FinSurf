@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from context import InfraContext
-from layers.api import EarningsApiLayer
+from layers.earnings_api import EarningsApiLayer
 from layers.pythonlambda import PythonLambda
 from aws_cdk import (
   core,

@@ -3,7 +3,7 @@ import os.path
 from context import InfraContext
 from aws_cdk.core import App, Stack, Environment
 from layers.basenet import BaseNetworkingLayer
-from layers.api import EarningsApiLayer
+from layers.earnings_api import EarningsApiLayer
 from layers.alexa import AlexaSkillLayer
 from layers.k8s import KubernetesClusterLayer
 src_root_dir = os.path.join(os.path.dirname(__file__),"..")
