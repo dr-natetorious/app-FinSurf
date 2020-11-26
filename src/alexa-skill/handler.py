@@ -12,9 +12,16 @@ import ask_sdk_core.utils as ask_utils
 
 from LaunchRequestHandler import LaunchRequestHandler
 from FetchEarningsByDate import FetchEarningsByDateHandler
+from errorhandlers import FallbackIntentHandler, CatchAllExceptionHandler
 
 sb = CustomSkillBuilder(api_client=DefaultApiClient())
 sb.add_request_handler(LaunchRequestHandler())
 sb.add_request_handler(FetchEarningsByDateHandler())
+sb.add_request_handler(FallbackIntentHandler())
+sb.add_exception_handler(CatchAllExceptionHandler())
 
-handler = sb.lambda_handler()
+sb.add_global_response_interceptor(LoggingResponseInterceptor())
+sb.add_global_request_interceptor(LoggingRequestInterceptor())
+
+# This is the exported entry point.
+lambda_handler = sb.lambda_handler()
