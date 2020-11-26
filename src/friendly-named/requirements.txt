@@ -4,3 +4,4 @@ requests
 lxml
 flask-lambda
 boto3
+redis
