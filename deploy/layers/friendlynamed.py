@@ -24,9 +24,17 @@ class FriendlyNamedLayer(core.Construct):
   def __init__(self, scope: core.Construct, id: str, context:InfraContext, **kwargs) -> None:
     super().__init__(scope, id, **kwargs)
       
-    self.security_group = ec2.SecurityGroup(self,'FriendlyNamed-SG',
+    self.security_group = ec2.SecurityGroup(self,'FriendlyNamedSvc-SG',
       vpc=context.networking.vpc,
+      allow_all_outbound=True,
       description='Security group for FriendlyNamed service components')
+
+    self.security_group.add_ingress_rule(
+      peer= ec2.Peer.any_ipv4(),
+      connection=ec2.Port(
+        protocol=ec2.Protocol.TCP,
+        string_representation='RedisInbound',
+        from_port=6379, to_port=6379))
 
     self.subnet_group = ec.CfnSubnetGroup(self,'CacheSubnets',
       cache_subnet_group_name='FriendlyNamed-Subnets',
@@ -44,10 +52,12 @@ class FriendlyNamedLayer(core.Construct):
       vpc_security_group_ids=[self.security_group.security_group_id])
   
     self.python_lambda = PythonLambda(self,'Friendly-Named',
-      build_prefix='artifacts/FinSurf-Friendly-Name',
-      handler='handler.lambda_handler',
+      build_prefix='artifacts/FinSurf-Friendly-Named',
+      handler='handler.app',
       subnet_group_name='FriendlyNamed',
-      context=context)
+      context=context,
+      securityGroups= [self.security_group])
+
     self.python_lambda.function.add_environment(
       key='REDIS_HOST', value=self.cluster.attr_redis_endpoint_address)
     self.python_lambda.function.add_environment(

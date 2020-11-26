@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import typing
 from context import InfraContext
 from aws_cdk import (
   core,
@@ -21,7 +22,8 @@ class PythonLambda(core.Construct):
     build_prefix:str,
     subnet_group_name:str,
     context:InfraContext,
-    handler,
+    handler:str,
+    securityGroups:typing.Optional[typing.List[ec2.SecurityGroup]]=None,
     **kwargs) -> None:
     super().__init__(scope, id, **kwargs)
 
@@ -47,4 +49,5 @@ class PythonLambda(core.Construct):
       tracing= lambda_.Tracing.ACTIVE,
       runtime = lambda_.Runtime.PYTHON_3_8,
       vpc= context.networking.vpc,
-      vpc_subnets=ec2.SubnetSelection(subnet_group_name=subnet_group_name))
+      vpc_subnets=ec2.SubnetSelection(subnet_group_name=subnet_group_name),
+      security_groups=securityGroups)
