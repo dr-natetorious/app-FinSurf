@@ -1,5 +1,5 @@
-from rttnewsclient import RttNewsEarningsClient
 from json import dumps
+from flask import request
 
 def init_flask_for_env():
   """
@@ -14,13 +14,12 @@ def init_flask_for_env():
     return FlaskLambda(__name__)
 
 app = init_flask_for_env()
-calendar = RttNewsEarningsClient()
 
 @app.route('/heartbeat')
 def hello_world():
   return 'Hello, World!'
 
-@app.route('/<date_str>')
-def fetch_by_date(date_str):
-  return dumps([x.to_hash() for x in calendar.get_for_date(date_str=date_str)])
-  
+@app.route('/connect')
+def connect_account():
+  print(request.args)
+  return 'Contacted.'
