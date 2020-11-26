@@ -18,6 +18,10 @@ app = init_flask_for_env()
 def hello_world():
   return 'Hello, World!'
 
+@app.route("/init")
+def init():
+  
+
 @app.route('/s/<symbol>')
 def resolve_symbol(symbol):
   return 'Let me get right on that for '+symbol

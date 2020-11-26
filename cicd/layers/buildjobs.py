@@ -46,13 +46,13 @@ class BuildJobLayer(core.Construct):
           build_image = context.build_images.python_build,
           build_role=self.build_role,
           app_dir='src/alexa-skill'),
-      'Friendly-Name':
-        BuildPythonZip(self,'Friendly-Name',
-          project_name='FinSurf-Friendly-Name',
+      'Friendly-Named':
+        BuildPythonZip(self,'Friendly-Named',
+          project_name='FinSurf-Friendly-Named',
           context=context,
           build_image = context.build_images.python_build,
           build_role=self.build_role,
-          app_dir='src/friendly-name'),
+          app_dir='src/friendly-named'),
     }    
 
 class BuildPythonZip(core.Construct):
