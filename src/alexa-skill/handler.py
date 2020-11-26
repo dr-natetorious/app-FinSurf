@@ -9,9 +9,12 @@ from ask_sdk_core.handler_input import HandlerInput
 from ask_sdk_model import Response
 from ask_sdk_core.exceptions import AskSdkException
 import ask_sdk_core.utils as ask_utils
+
 from LaunchRequestHandler import LaunchRequestHandler
+from FetchEarningsByDate import FetchEarningsByDateHandler
 
 sb = CustomSkillBuilder(api_client=DefaultApiClient())
 sb.add_request_handler(LaunchRequestHandler())
+sb.add_request_handler(FetchEarningsByDateHandler())
 
 handler = sb.lambda_handler()
