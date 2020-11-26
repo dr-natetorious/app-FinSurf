@@ -23,7 +23,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
     builder = handler_input.response_builder
 
     return (builder
-      .speak('Heya this works')
+      .speak('Hey this works')
       .ask('will codepipeline ever finish')
       .response
     )

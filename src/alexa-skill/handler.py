@@ -13,6 +13,7 @@ import ask_sdk_core.utils as ask_utils
 from LaunchRequestHandler import LaunchRequestHandler
 from FetchEarningsByDate import FetchEarningsByDateHandler
 from errorhandlers import FallbackIntentHandler, CatchAllExceptionHandler
+from interceptors import LoggingRequestInterceptor, LoggingResponseInterceptor
 
 sb = CustomSkillBuilder(api_client=DefaultApiClient())
 sb.add_request_handler(LaunchRequestHandler())
