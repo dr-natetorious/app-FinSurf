@@ -24,6 +24,7 @@ class AlexaSkillLayer(core.Construct):
   
     self.python_lambda = PythonLambda(self,'AlexaSkill',
       build_prefix='artifacts/FinSurf-Alexa-Skill',
+      handler='handler.lambda_handler',
       subnet_group_name='Alexa',
       context=context)
 
