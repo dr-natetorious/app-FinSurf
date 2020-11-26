@@ -21,7 +21,7 @@ class PythonLambda(core.Construct):
     build_prefix:str,
     subnet_group_name:str,
     context:InfraContext,
-    handler='handler.py',
+    handler,
     **kwargs) -> None:
     super().__init__(scope, id, **kwargs)
 

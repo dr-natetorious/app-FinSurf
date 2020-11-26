@@ -24,6 +24,7 @@ class EarningsApiLayer(core.Construct):
     python_lambda = PythonLambda(self,'FlaskFunction',
       build_prefix='artifacts/Earnings-DataServices',
       subnet_group_name='EarningApi',
+      handler='handler.app',
       context=context)
 
     self.flask_lambda = python_lambda.function
