@@ -5,7 +5,7 @@ phases:
     commands:
       - cd $APP_DIR
       - mkdir -p /artifacts
-      - zip -r /artifacts/app.zip . -x *.md -x requirements.txt
+      - zip -r /artifacts/app.zip . -x *.md -x requirements.txt -x *.bat
       - pip install -r requirements.txt -t /out/python
   post_build:
     commands:

@@ -21,7 +21,7 @@ class DataStore:
     else:
       return value
 
-  def set_symbol_translation(self,symbol,value) -> None:
+  def set_symbol_translation(self,symbol:str,value:str) -> None:
     """
     Stores a stock symbols friendly name
     """

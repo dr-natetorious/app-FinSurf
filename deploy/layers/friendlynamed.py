@@ -13,6 +13,7 @@ from aws_cdk import (
   aws_kms as kms,
   aws_ssm as ssm,
   aws_elasticache as ec,
+  aws_apigateway as a,
   core
 )
 
@@ -51,3 +52,8 @@ class FriendlyNamedLayer(core.Construct):
       key='REDIS_HOST', value=self.cluster.attr_redis_endpoint_address)
     self.python_lambda.function.add_environment(
       key='REDIS_PORT', value=self.cluster.attr_redis_endpoint_port)
+
+    self.rest_api = a.LambdaRestApi(self,'FriendlyNamed',
+      handler=self.python_lambda.function,
+      proxy=True,
+      description='The FinSurf Symbol to FriendlyName API')
