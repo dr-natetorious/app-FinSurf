@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-from context import InfraContext
+from reusable.context import InfraContext
+from reusable.pythonlambda import PythonLambda
+
 from layers.earnings_api import EarningsApiLayer
-from layers.pythonlambda import PythonLambda
 from aws_cdk import (
   core,
   aws_s3 as s3,
@@ -28,10 +29,11 @@ class AlexaSkillLayer(core.Construct):
       subnet_group_name='Alexa',
       context=context)
 
-    self.__build(self.python_lambda.function, context.earnings_api.rest_api)
+    self.__build(self.python_lambda.function, context)
 
-  def __build(self,function:lambda_.Function, earnings_api:a.LambdaRestApi):
-    function.add_environment('EARNINGS_API', earnings_api.url)
+  def __build(self,function:lambda_.Function, context:InfraContext):
+    function.add_environment('EARNINGS_API', context.earnings_api.url)
+    function.add_environment('FRIENDLY_NAME_API', context.fnapi.url)
 
     function.add_permission(
       id='Alexa-Trigger',

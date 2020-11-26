@@ -12,6 +12,9 @@ from ask_sdk_core.handler_input import HandlerInput
 from ask_sdk_model import Response
 from ask_sdk_core.exceptions import AskSdkException
 import ask_sdk_core.utils as ask_utils
+from FriendlyNamedClient import FriendlyNamedClient
+
+fnapi = FriendlyNamedClient()
 
 class FetchEarningsByDateHandler(AbstractRequestHandler):
 
@@ -41,5 +44,5 @@ class FetchEarningsByDateHandler(AbstractRequestHandler):
 
     return "There are {count} reportings including {highlights}".format(
       count=len(df),
-      highlights=", ".join([x['symbol'] for x in df][0:3])
+      highlights=", ".join([fnapi.resolve_symbol(x['symbol']) for x in df][0:3])
     )

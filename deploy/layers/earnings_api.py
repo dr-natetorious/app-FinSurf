@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-from context import InfraContext
-from layers.pythonlambda import PythonLambda
+from reusable.context import InfraContext
+from reusable.pythonlambda import PythonLambda
+from reusable.proxyfrontend import LambdaProxyConstruct
 from aws_cdk import (
   core,
   aws_s3 as s3,
@@ -47,7 +48,8 @@ class EarningsApiLayer(core.Construct):
         resources=[self.cache_table.table_arn]
       ))
 
-    self.rest_api = a.LambdaRestApi(self,'EarningsApi',
+    self.frontend_proxy = LambdaProxyConstruct(self,'EarningsApi',
       handler=self.flask_lambda,
-      proxy=True,
-      description='The FinSurf Earnings API')
+      context=context)
+
+    self.url = self.frontend_proxy.rest_api.url

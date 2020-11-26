@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
+from reusable.context import InfraContext
 from aws_cdk import (
     aws_ec2 as ec2,
     aws_route53 as dns,
+    aws_certificatemanager as acm,
     core
 )
 
@@ -9,7 +11,7 @@ class BaseNetworkingLayer(core.Construct):
   """
   Configure and deploy the network
   """
-  def __init__(self, scope: core.Construct, id: str, **kwargs) -> None:
+  def __init__(self, scope: core.Construct, id: str, context:InfraContext, **kwargs) -> None:
     super().__init__(scope, id, **kwargs)
 
     self.__vpc = ec2.Vpc(self,'FinSurf', 
@@ -27,12 +29,16 @@ class BaseNetworkingLayer(core.Construct):
       ]
     )
 
-    self.hostedZone = dns.PrivateHostedZone(self, 'PrivateFinSurfZone',
+    self.__hostedZone = dns.PrivateHostedZone(self, 'PrivateFinSurfZone',
       vpc= self.vpc,
-      zone_name='finsurf.internal',
+      zone_name=context.environment.region+'.finsurf.internal',
       comment='Internal zone for FinSurf application'
     )
 
   @property
   def vpc(self) -> ec2.Vpc:
     return self.__vpc
+
+  @property
+  def dns_zone(self)->dns.PrivateHostedZone:
+    return self.__hostedZone

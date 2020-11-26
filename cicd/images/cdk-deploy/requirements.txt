@@ -18,3 +18,6 @@ aws_cdk.aws_kinesis
 aws_cdk.aws_lambda_event_sources
 aws_cdk.aws_ssm
 aws_cdk.aws_elasticache
+aws_cdk.aws_route53
+aws_cdk.aws_route53-targets
+aws_cdk.aws_certificatemanager

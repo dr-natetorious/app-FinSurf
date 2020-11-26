@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-from context import InfraContext
-from layers.earnings_api import EarningsApiLayer
-from layers.pythonlambda import PythonLambda
+from reusable.context import InfraContext
+from reusable.proxyfrontend import LambdaProxyConstruct
+from reusable.pythonlambda import PythonLambda
+
 from aws_cdk import (
   core,
   aws_s3 as s3,
@@ -14,6 +15,9 @@ from aws_cdk import (
   aws_ssm as ssm,
   aws_elasticache as ec,
   aws_apigateway as a,
+  aws_route53 as dns,
+  aws_route53_targets as dns_t,
+  aws_certificatemanager as acm,
   core
 )
 
@@ -63,7 +67,8 @@ class FriendlyNamedLayer(core.Construct):
     self.python_lambda.function.add_environment(
       key='REDIS_PORT', value=self.cluster.attr_redis_endpoint_port)
 
-    self.rest_api = a.LambdaRestApi(self,'FriendlyNamed',
+    self.frontend_proxy = LambdaProxyConstruct(self,'FriendlyNamedAPI',
       handler=self.python_lambda.function,
-      proxy=True,
-      description='The FinSurf Symbol to FriendlyName API')
+      context=context)
+
+    self.url = self.frontend_proxy.rest_api.url
