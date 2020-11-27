@@ -53,6 +53,13 @@ class BuildJobLayer(core.Construct):
           build_image = context.build_images.python_build,
           build_role=self.build_role,
           app_dir='src/friendly-named'),
+      'Account-Linking':
+        BuildPythonZip(self,'Account-Linking',
+          project_name='FinSurf-Account-Linking',
+          context=context,
+          build_image = context.build_images.python_build,
+          build_role=self.build_role,
+          app_dir='src/account-linking')
     }    
 
 class BuildPythonZip(core.Construct):
