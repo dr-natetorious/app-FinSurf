@@ -13,7 +13,7 @@ from aws_cdk import (
   aws_ec2 as ec2,
   aws_lambda as lambda_,
   aws_lambda_event_sources as evt,
-  aws_neptune as n
+  aws_neptune as n,
 )
 
 src_root_dir = path.join(path.dirname(__file__),"../..")
@@ -54,10 +54,14 @@ class PortfolioLayer(core.Construct):
         string_representation='Neptune',
         from_port=8182, to_port=8182))
     
-    self.cluster = n.CfnDBCluster(self,'NeptuneCluster',
+    #cluster_role = iam.Role(self,'NeptuneClusterRole')
+    #n.CfnDBCluster.DBClusterRoleProperty(role_arn=cluster_role.role_arn)
+
+    self.neptune_cluster = n.CfnDBCluster(self,'NeptuneCluster',
       db_subnet_group_name=self.subnet_group.db_subnet_group_name,
       deletion_protection=False,
-      iam_auth_enabled=True,
+      #associated_roles=[cluster_role],
+      iam_auth_enabled=False,
       storage_encrypted=True,
       vpc_security_group_ids=[self.security_group.security_group_id])
 
