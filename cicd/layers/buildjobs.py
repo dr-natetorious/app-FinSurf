@@ -60,13 +60,20 @@ class BuildJobLayer(core.Construct):
           build_image = context.build_images.python_build,
           build_role=self.build_role,
           app_dir='src/account-linking'),
-      'FinSurf-Portfolio-Mgmt':
-        BuildPythonZip(self,'Portfolio-Mgmt',
-          project_name='FinSurf-Portfolio-Mgmt',
+      'FinSurf-PM-UpdatesHandler':
+        BuildPythonZip(self,'PortfolioMgmt-UpdatesHandler',
+          project_name='FinSurf-PortfolioMgmt-UpdatesHandler',
           context=context,
           build_image = context.build_images.python_build,
           build_role=self.build_role,
-          app_dir='src/portfoliomgmt'),
+          app_dir='src/portfolio-mgmt/updates-handler'),
+      'FinSurf-PM-API':
+        BuildPythonZip(self,'PortfolioMgmt-API',
+          project_name='FinSurf-PortfolioMgmt-API',
+          context=context,
+          build_image = context.build_images.python_build,
+          build_role=self.build_role,
+          app_dir='src/portfolio-mgmt/pmapi'),
     }    
 
 class BuildPythonZip(core.Construct):
