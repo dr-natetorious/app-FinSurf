@@ -1,7 +1,2 @@
-flask
-bs4
-requests
-lxml
-flask-lambda
 boto3
 gremlinpython
