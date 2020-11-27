@@ -5,6 +5,7 @@ from reusable.pythonlambda import PythonLambda
 
 from aws_cdk import (
   core,
+  aws_iam as iam,
   aws_apigateway as a,
   aws_ec2 as ec2,
   aws_lambda as lambda_,
@@ -40,7 +41,7 @@ class AccountLinkingLayer(core.Construct):
 
   def __configure_secrets(self, function:lambda_.Function, secret:sm.Secret) -> None:
     secret.grant_write(function.role)
-    function.add_environment('TDA_SECRET_ID', secret.secret_name)
+    function.add_environment('TDA_SECRET_ID', secret.secret_full_arn)
 
   def __configure_tda_auth(self,function:lambda_.Function) -> None:    
     """
@@ -53,5 +54,5 @@ class AccountLinkingLayer(core.Construct):
 
     client_id = ssm.StringParameter.from_string_parameter_name(self, 'TDA_CLIENT_ID',
       string_parameter_name='/app-FinSurf/tdameritrade/client_id')
-    function.add_environment(key='TDA_CLIENT', value=client_id.string_value)
+    function.add_environment(key='TDA_CLIENT_ID', value=client_id.string_value)
   
