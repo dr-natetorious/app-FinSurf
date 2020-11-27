@@ -59,7 +59,14 @@ class BuildJobLayer(core.Construct):
           context=context,
           build_image = context.build_images.python_build,
           build_role=self.build_role,
-          app_dir='src/account-linking')
+          app_dir='src/account-linking'),
+      'FinSurf-Portfolio-Mgmt':
+        BuildPythonZip(self,'Portfolio-Mgmt',
+          project_name='FinSurf-Portfolio-Mgmt',
+          context=context,
+          build_image = context.build_images.python_build,
+          build_role=self.build_role,
+          app_dir='src/portfoliomgmt'),
     }    
 
 class BuildPythonZip(core.Construct):
