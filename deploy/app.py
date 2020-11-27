@@ -9,6 +9,7 @@ from layers.k8s import KubernetesClusterLayer
 from layers.friendlynamed import FriendlyNamedLayer
 from layers.accountlinking import AccountLinkingLayer
 from layers.secrets import SecretsLayer
+from layers.portfoliolayer import PortfolioLayer
 src_root_dir = os.path.join(os.path.dirname(__file__),"..")
 
 default_env= Environment(region="us-west-2")
@@ -21,6 +22,7 @@ def create_infra_stack(infra_stack):
     context.fnapi = FriendlyNamedLayer(infra_stack,'FriendlyNamed',context=context)
     AlexaSkillLayer(infra_stack,'AlexaSkills', context=context)
     AccountLinkingLayer(infra_stack, 'AccountLinking', context=context)
+    PortfolioLayer(infra_stack,'PortfolioMgmt', context=context)
     #cluster = KubernetesClusterLayer(infra_stack, 'KubernetesClusterLayer',vpc=networking.vpc)
 
 app = App()

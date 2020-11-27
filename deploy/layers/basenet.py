@@ -27,6 +27,7 @@ class BaseNetworkingLayer(core.Construct):
         ec2.SubnetConfiguration(name='Alexa',subnet_type= ec2.SubnetType.PRIVATE, cidr_mask=24),
         ec2.SubnetConfiguration(name='FriendlyNamed',subnet_type= ec2.SubnetType.PRIVATE, cidr_mask=24),
         ec2.SubnetConfiguration(name='AccountLinking',subnet_type= ec2.SubnetType.PRIVATE, cidr_mask=24),
+        ec2.SubnetConfiguration(name='PortfolioMgmt',subnet_type= ec2.SubnetType.PRIVATE, cidr_mask=24),
       ]
     )
 
