@@ -32,14 +32,24 @@ class CodePipelineLayer(core.Construct):
 
     # # Add trigger
     github_init_artifact = p.Artifact(artifact_name='github-init-artifact')
+
     self.core_pipeline.add_stage(
       stage_name='Trigger',
       actions=[
+        # actions.S3SourceAction(
+        #   action_name='Start-by-S3',
+        #   bucket=self.core_pipeline.artifact_bucket,
+        #   bucket_key='temp-does-not-exist',
+        #   output=github_init_artifact)
         actions.GitHubSourceAction(
           action_name='Init-from-GitHub',
           owner='dr-natetorious',
           repo='app-FinSurf',
-          oauth_token=core.SecretValue.secrets_manager('GithubPersonalAccessToken',json_field='GitHubPersonalAccessToken'),          
+          # Note: The secret must be:
+          #  1. formated non-json using the literal value from github.com/settings/tokens
+          #     e.g., 1837422b*****26d31c
+          #  2. referencing a token that includes scopes notifications, repo, workflow
+          oauth_token=core.SecretValue.secrets_manager('GithubAccessToken.us-west-2'),
           output=github_init_artifact
         )
       ])
