@@ -13,7 +13,11 @@ from aws_cdk import (
   aws_ec2 as ec2,
   aws_lambda as lambda_,
   aws_lambda_event_sources as evt,
+  aws_secretsmanager as sm,
+  aws_ssm as ssm,
+  aws_logs as logs,
   aws_neptune as n,
+  aws_logs_destinations as dest,
 )
 
 src_root_dir = path.join(path.dirname(__file__),"../..")
@@ -27,7 +31,9 @@ class PortfolioLayer(core.Construct):
     self.__configure_neptune(vpc=context.networking.vpc)
     self.__configure_ingestion(context=context)
     self.__configure_gateway(context)
-    self.__configure_monitor(vpc=context.networking.vpc)
+    self.__configure_monitor(
+      vpc=context.networking.vpc,
+      secret=context.secrets.tda_secret)
 
   @property
   def updates_handler(self) -> lambda_.Function:
@@ -116,8 +122,9 @@ class PortfolioLayer(core.Construct):
           securityGroups= [self.security_group]).function
       ))
 
-  def __configure_monitor(self, vpc:ec2.Vpc):
-    task_definition = ecs.FargateTaskDefinition(self,'TaskDefinition')
+  def __configure_monitor(self, vpc:ec2.Vpc, secret:sm.Secret):
+    task_definition = ecs.FargateTaskDefinition(
+      self,'TaskDefinition')
     
     image = ecs.ContainerImage.from_docker_image_asset(
       asset=assets.DockerImageAsset(
@@ -125,19 +132,57 @@ class PortfolioLayer(core.Construct):
         directory=path.join(src_root_dir,'src/portfolio-mgmt/monitor'),
         repository_name='finsurf-pm-monitor'))
 
+    log_group = logs.LogGroup(
+      self,'MonitoringLogGroup',
+      log_group_name='/finsurf/pm/monitoring',
+      removal_policy=core.RemovalPolicy.DESTROY,
+      retention=logs.RetentionDays.TWO_WEEKS)
+
+    logs.SubscriptionFilter(
+      self,'MonitoringFilter',
+      log_group= log_group,
+      filter_pattern=logs.FilterPattern.any_term('data'),
+      destination=dest.KinesisDestination(
+        stream = self.updates_stream))
+
+    env_vars = {}
+    env_vars.update(self.__get_tda_auth(secret))
     task_definition.add_container(
       'MonitoringContainer',
       image=image,
-      command=['bash'],
+      logging= ecs.AwsLogDriver(        
+        log_group=log_group,
+        stream_prefix='pm-monitoring'
+      ),
+      environment=env_vars,
       essential=True)
+
+    secret.grant_read(task_definition.task_role)
     
     self.pm_compute_cluster = ecs.Cluster(self,'Cluster',vpc=vpc)
     self.monitoring_svc = ecs.FargateService(
       self,'PortMgmt-Monitoring',
       cluster=self.pm_compute_cluster,
       assign_public_ip=False,
-      desired_count=0,
+      desired_count=1,
       security_group=self.security_group,
       service_name='finsurf-pm-monitor',
       vpc_subnets=ec2.SubnetSelection(subnet_group_name='PortfolioMgmt'),
       task_definition=task_definition)
+
+  def __get_tda_auth(self,secret:sm.Secret) -> None:    
+    """
+    Fetches the OAuth2 values from SSM
+    """
+    redirect_uri = ssm.StringParameter.from_string_parameter_name(self,'TDA-Redirect-Parameter',
+      string_parameter_name='/app-FinSurf/tdameritrade/redirect_uri')    
+
+    client_id = ssm.StringParameter.from_string_parameter_name(self, 'TDA_CLIENT_ID',
+      string_parameter_name='/app-FinSurf/tdameritrade/client_id')
+
+    return {
+      'TDA_CLIENT_ID':client_id.string_value,
+      'TDA_REDIRECT_URI':redirect_uri.string_value,
+      'TDA_SECRET_ID':secret.secret_arn
+    }
+  
