@@ -9,8 +9,6 @@ phases:
       - pip install -r requirements.txt -t /out/python
       - cd /out
       - zip -r /artifacts/deps.zip .
-  post_build:
-    commands:
       - echo $OUTPUT_PATH
       - echo $PARAM_NAME
       - find /artifacts
