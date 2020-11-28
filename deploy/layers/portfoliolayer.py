@@ -60,16 +60,34 @@ class PortfolioLayer(core.Construct):
         string_representation='Neptune',
         from_port=8182, to_port=8182))
     
-    #cluster_role = iam.Role(self,'NeptuneClusterRole')
-    #n.CfnDBCluster.DBClusterRoleProperty(role_arn=cluster_role.role_arn)
-
-    self.neptune_cluster = n.CfnDBCluster(self,'NeptuneCluster',
+    # cluster_role = iam.Role(self,'NeptuneClusterRole',
+    #   assumed_by= iam.ServicePrincipal(service='neptune.amazonaws.com'))
+    
+    self.neptune_cluster = n.CfnDBCluster(
+      self,'NeptuneCluster',
       db_subnet_group_name=self.subnet_group.db_subnet_group_name,
       deletion_protection=False,
       #associated_roles=[cluster_role],
-      iam_auth_enabled=False,
+      iam_auth_enabled=True,
       storage_encrypted=True,
+      db_cluster_identifier='portfoliomgmt',
       vpc_security_group_ids=[self.security_group.security_group_id])
+
+    counter=0
+    for net in vpc._select_subnet_objects(subnet_group_name='PortfolioMgmt'):
+      az_name = net.availability_zone
+      counter+=1
+      self.neptune_instance = n.CfnDBInstance(
+        self,'NeptuneInstance-'+str(counter),
+        availability_zone=az_name,
+        db_instance_identifier='portmgmt-instance-'+str(counter),
+        db_instance_class='db.t3.medium',
+        allow_major_version_upgrade=False,
+        auto_minor_version_upgrade=True,
+        db_cluster_identifier=self.neptune_cluster.db_cluster_identifier,
+        db_subnet_group_name=self.subnet_group.db_subnet_group_name)
+
+    #n.CfnDBCluster.DBClusterRoleProperty(role_arn=cluster_role.role_arn)
 
   def __configure_ingestion(self, context:InfraContext)->None:
     self.__updates_stream = k.Stream(self,'PortfolioUpdates',
