@@ -68,7 +68,7 @@ class PortfolioLayer(core.Construct):
       db_subnet_group_name=self.subnet_group.db_subnet_group_name,
       deletion_protection=False,
       #associated_roles=[cluster_role],
-      iam_auth_enabled=True,
+      iam_auth_enabled=False,
       storage_encrypted=True,
       db_cluster_identifier='portfoliomgmt',
       vpc_security_group_ids=[self.security_group.security_group_id])
@@ -108,6 +108,12 @@ class PortfolioLayer(core.Construct):
       source=evt.KinesisEventSource(
         stream= self.updates_stream,
         starting_position=lambda_.StartingPosition.LATEST))
+    
+    # Configure writing to neptune
+    self.updates_handler.role.add_managed_policy(
+      policy=iam.ManagedPolicy.from_aws_managed_policy_name('NeptuneFullAccess'))
+    self.updates_handler.add_environment(
+      key='NEPTUNE_ENDPOINT', value=self.neptune_cluster.attr_endpoint)
 
   def __configure_gateway(self, context) ->None:
     self.gateway = a.RestApi(self,'PortfolioMgmt')

@@ -7,4 +7,5 @@ parser = CloudWatchSubscriptionEventParser()
 writer = GraphWriter()
 def lambda_handler(kinesisEvent,context):
   messages = parser.from_kinesis_event(kinesisEvent)
-  
+  for message in messages:
+    writer.write_td_stream_message(message)

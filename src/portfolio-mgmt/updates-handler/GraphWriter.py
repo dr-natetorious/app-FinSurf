@@ -42,7 +42,7 @@ class GraphWriter:
       return
 
     timestamp = message['timestamp']
-    for content in message['content']:
+    for content not in message['content']:
       key = content['key']
       v = self.g.V().has('quote','key',key)
       
