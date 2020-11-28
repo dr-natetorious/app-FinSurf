@@ -60,14 +60,10 @@ class PortfolioLayer(core.Construct):
         string_representation='Neptune',
         from_port=8182, to_port=8182))
     
-    # cluster_role = iam.Role(self,'NeptuneClusterRole',
-    #   assumed_by= iam.ServicePrincipal(service='neptune.amazonaws.com'))
-    
     self.neptune_cluster = n.CfnDBCluster(
       self,'NeptuneCluster',
       db_subnet_group_name=self.subnet_group.db_subnet_group_name,
       deletion_protection=False,
-      #associated_roles=[cluster_role],
       iam_auth_enabled=False,
       storage_encrypted=True,
       db_cluster_identifier='portfoliomgmt',
@@ -110,8 +106,6 @@ class PortfolioLayer(core.Construct):
         starting_position=lambda_.StartingPosition.LATEST))
     
     # Configure writing to neptune
-    self.updates_handler.role.add_managed_policy(
-      policy=iam.ManagedPolicy.from_aws_managed_policy_name('NeptuneFullAccess'))
     self.updates_handler.add_environment(
       key='NEPTUNE_ENDPOINT', value=self.neptune_cluster.attr_endpoint)
 
@@ -143,8 +137,7 @@ class PortfolioLayer(core.Construct):
           handler='handler.app',
           subnet_group_name='PortfolioMgmt',
           context=context,
-          securityGroups= [self.security_group]).function
-      ))
+          securityGroups= [self.security_group]).function))
 
   def __configure_monitor(self, vpc:ec2.Vpc, secret:sm.Secret):
     task_definition = ecs.FargateTaskDefinition(
