@@ -38,7 +38,7 @@ class PortfolioLayer(core.Construct):
     self.__configure_ingestion()
     self.__configure_gateway()
     self.__configure_monitor()
-    #self.__configure_fundamentals()
+    self.__configure_fundamentals()
 
   @property
   def updates_handler(self) -> lambda_.Function:
@@ -228,6 +228,13 @@ class PortfolioLayer(core.Construct):
       removal_policy=core.RemovalPolicy.DESTROY,
       retention=logs.RetentionDays.TWO_WEEKS)
 
+    logs.SubscriptionFilter(
+      self,'FunLG-Subscription',
+      log_group= log_group,
+      filter_pattern=logs.FilterPattern.any_term('data'),
+      destination=dest.KinesisDestination(
+        stream = self.updates_stream))
+
     env_vars = {}
     env_vars.update(self.tda_env_vars)
     task_definition.add_container(
@@ -242,7 +249,7 @@ class PortfolioLayer(core.Construct):
 
     sft = ecsp.ScheduledFargateTask(
       self,'FundamentalsTask',
-      schedule= scale.Schedule.expression(expression='0 0 0 ? * * *'),
+      schedule= scale.Schedule.cron(hour="22", minute="0", week_day="2-6"),
       cluster=self.pm_compute_cluster,
       desired_task_count=1,
       scheduled_fargate_task_definition_options= ecsp.ScheduledFargateTaskDefinitionOptions(task_definition=task_definition),
