@@ -23,7 +23,11 @@ class BuildJobLayer(core.Construct):
     self.build_role = iam.Role(self,'CodeBuildRole',
       assumed_by= iam.ServicePrincipal(service="codebuild.amazonaws.com"),
       description='FinSurf code building account',
-      managed_policies=[iam.ManagedPolicy.from_aws_managed_policy_name("AWSCodeBuildAdminAccess")])
+      managed_policies=[
+        iam.ManagedPolicy.from_aws_managed_policy_name("AWSCodeBuildAdminAccess"),
+        iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AmazonSSMAutomationRole"),
+        iam.ManagedPolicy.from_aws_managed_policy_name('AWSCloudFormationFullAccess'),
+      ])
 
     # Create project for infrastructure
     self.cdk_infra_project = DeployInfraJob(self,'DeployInfra',
@@ -104,7 +108,10 @@ class BuildPythonZip(core.Construct):
           repository=build_image.repository,
           tag=build_image.image_uri.split(':')[-1]),
         environment_variables={
-          'APP_DIR':b.BuildEnvironmentVariable(value=app_dir)
+          'APP_DIR':b.BuildEnvironmentVariable(value=app_dir),
+          'PROJECT_NAME': b.BuildEnvironmentVariable(value=project_name),
+          'ARTIFACTS_BUCKET': b.BuildEnvironmentVariable(value=context.buckets.artifacts_bucket.bucket_name),
+          'ARTIFACTS_PREFIX': b.BuildEnvironmentVariable(value='cicd/'+project_name),
         },
         compute_type=b.ComputeType.SMALL
       ),

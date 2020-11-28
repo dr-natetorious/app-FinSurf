@@ -1,5 +1,8 @@
 version: 0.2
-
+env:
+  variables:
+    CICD_OUTPUT: "s3://$ARTIFACTS_BUCKET/$ARTIFACTS_PREFIX/$CODEBUILD_BUILD_NUMBER"
+    PARAM_NAME: "/app-finsurf/artifacts/bin/$PROJECT_NAME"
 phases:
   build:
     commands:
@@ -7,10 +10,12 @@ phases:
       - mkdir -p /artifacts
       - zip -r /artifacts/app.zip . -x *.md -x requirements.txt -x *.bat
       - pip install -r requirements.txt -t /out/python
-  post_build:
-    commands:
       - cd /out
       - zip -r /artifacts/deps.zip .
+  post_build:
+    commands:
+      - aws s3 cp --recursive /artifacts $CICD_OUTPUT
+      - aws ssm put-parameter --name $PARAM_NAME --type String --value $CICD_OUTPUT
 artifacts:
   files:
     - "**/*"

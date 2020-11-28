@@ -18,6 +18,8 @@ from aws_cdk import (
   aws_logs as logs,
   aws_neptune as n,
   aws_logs_destinations as dest,
+  aws_ecs_patterns as ecsp,
+  aws_applicationautoscaling as scale,
 )
 
 src_root_dir = path.join(path.dirname(__file__),"../..")
@@ -28,12 +30,15 @@ class PortfolioLayer(core.Construct):
   """
   def __init__(self, scope: core.Construct, id: str, context:InfraContext, **kwargs) -> None:
     super().__init__(scope, id, **kwargs)
-    self.__configure_neptune(vpc=context.networking.vpc)
-    self.__configure_ingestion(context=context)
-    self.__configure_gateway(context)
-    self.__configure_monitor(
-      vpc=context.networking.vpc,
-      secret=context.secrets.tda_secret)
+    self.__context = context
+    self.__vpc = context.networking.vpc
+    self.__tda_secret = context.secrets.tda_secret
+    self.__tda_env_vars = self.__get_tda_auth()
+    self.__configure_neptune()
+    self.__configure_ingestion()
+    self.__configure_gateway()
+    self.__configure_monitor()
+    #self.__configure_fundamentals()
 
   @property
   def updates_handler(self) -> lambda_.Function:
@@ -43,14 +48,30 @@ class PortfolioLayer(core.Construct):
   def updates_stream(self) -> k.Stream:
     return self.__updates_stream
 
-  def __configure_neptune(self, vpc:ec2.Vpc)->None:
+  @property
+  def vpc(self) -> ec2.Vpc:
+    return self.__vpc
+
+  @property
+  def tda_secret(self) -> sm.Secret:
+    return self.__tda_secret
+
+  @property
+  def context(self) -> InfraContext:
+    return self.__context
+
+  @property
+  def tda_env_vars(self)->dict:
+    return self.__tda_env_vars
+
+  def __configure_neptune(self)->None:
     self.subnet_group = n.CfnDBSubnetGroup(self,'SubnetGroup',
       db_subnet_group_description='Portfolio Management',
       db_subnet_group_name='portfoliomgmtsubnetgroup',
-      subnet_ids= [net.subnet_id for net in vpc._select_subnet_objects(subnet_group_name='PortfolioMgmt')])
+      subnet_ids= [net.subnet_id for net in self.vpc._select_subnet_objects(subnet_group_name='PortfolioMgmt')])
 
     self.security_group = ec2.SecurityGroup(self,'SecGroup',
-      vpc=vpc,
+      vpc=self.vpc,
       allow_all_outbound=True,
       description='Security group for PortfolioMgmt feature')
     self.security_group.add_ingress_rule(
@@ -70,7 +91,7 @@ class PortfolioLayer(core.Construct):
       vpc_security_group_ids=[self.security_group.security_group_id])
 
     counter=0
-    for net in vpc._select_subnet_objects(subnet_group_name='PortfolioMgmt'):
+    for net in self.vpc._select_subnet_objects(subnet_group_name='PortfolioMgmt'):
       az_name = net.availability_zone
       counter+=1
       self.neptune_instance = n.CfnDBInstance(
@@ -85,7 +106,7 @@ class PortfolioLayer(core.Construct):
 
     #n.CfnDBCluster.DBClusterRoleProperty(role_arn=cluster_role.role_arn)
 
-  def __configure_ingestion(self, context:InfraContext)->None:
+  def __configure_ingestion(self)->None:
     self.__updates_stream = k.Stream(self,'PortfolioUpdates',
       encryption=k.StreamEncryption.MANAGED,
       retention_period=core.Duration.days(1),
@@ -97,7 +118,7 @@ class PortfolioLayer(core.Construct):
       build_prefix='artifacts/FinSurf-PortfolioMgmt-UpdatesHandler',
       handler='updates_handler.lambda_handler',
       subnet_group_name='PortfolioMgmt',
-      context=context,
+      context=self.context,
       securityGroups= [self.security_group]).function
 
     self.updates_handler.add_event_source(
@@ -109,7 +130,7 @@ class PortfolioLayer(core.Construct):
     self.updates_handler.add_environment(
       key='NEPTUNE_ENDPOINT', value=self.neptune_cluster.attr_endpoint)
 
-  def __configure_gateway(self, context) ->None:
+  def __configure_gateway(self) ->None:
     self.gateway = a.RestApi(self,'PortfolioMgmt')
 
     # Create kinesis integration
@@ -136,16 +157,16 @@ class PortfolioLayer(core.Construct):
           build_prefix='artifacts/FinSurf-PortfolioMgmt-API',
           handler='handler.app',
           subnet_group_name='PortfolioMgmt',
-          context=context,
+          context=self.context,
           securityGroups= [self.security_group]).function))
 
-  def __configure_monitor(self, vpc:ec2.Vpc, secret:sm.Secret):
+  def __configure_monitor(self):
     task_definition = ecs.FargateTaskDefinition(
-      self,'TaskDefinition')
+      self,'MonitoringTaskDefinition')
     
     image = ecs.ContainerImage.from_docker_image_asset(
       asset=assets.DockerImageAsset(
-        self,'DockerAsset',
+        self,'MonitoringDockerAsset',
         directory=path.join(src_root_dir,'src/portfolio-mgmt/monitor'),
         repository_name='finsurf-pm-monitor'))
 
@@ -163,7 +184,7 @@ class PortfolioLayer(core.Construct):
         stream = self.updates_stream))
 
     env_vars = {}
-    env_vars.update(self.__get_tda_auth(secret))
+    env_vars.update(self.tda_env_vars)
     task_definition.add_container(
       'MonitoringContainer',
       image=image,
@@ -174,9 +195,9 @@ class PortfolioLayer(core.Construct):
       environment=env_vars,
       essential=True)
 
-    secret.grant_read(task_definition.task_role)
+    self.tda_secret.grant_read(task_definition.task_role)
     
-    self.pm_compute_cluster = ecs.Cluster(self,'Cluster',vpc=vpc)
+    self.pm_compute_cluster = ecs.Cluster(self,'Cluster',vpc=self.vpc)
     self.monitoring_svc = ecs.FargateService(
       self,'PortMgmt-Monitoring',
       cluster=self.pm_compute_cluster,
@@ -187,7 +208,48 @@ class PortfolioLayer(core.Construct):
       vpc_subnets=ec2.SubnetSelection(subnet_group_name='PortfolioMgmt'),
       task_definition=task_definition)
 
-  def __get_tda_auth(self,secret:sm.Secret) -> None:    
+  def __configure_fundamentals(self) -> None:
+    """
+    Configure the daily check for fundamental data data.
+    """
+    task_definition = ecs.FargateTaskDefinition(
+      self,'FundamentalsTaskDefinition')
+    self.tda_secret.grant_read(task_definition.task_role)
+    
+    image = ecs.ContainerImage.from_docker_image_asset(
+      asset=assets.DockerImageAsset(
+        self,'FundamentalsDockerAsset',
+        directory=path.join(src_root_dir,'src/portfolio-mgmt/fundamentals'),
+        repository_name='finsurf-pm-fundamentals'))
+    
+    log_group = logs.LogGroup(
+      self,'FundamentalLogGroup',
+      log_group_name='/finsurf/pm/fundamentals',
+      removal_policy=core.RemovalPolicy.DESTROY,
+      retention=logs.RetentionDays.TWO_WEEKS)
+
+    env_vars = {}
+    env_vars.update(self.tda_env_vars)
+    task_definition.add_container(
+      'FundamentalsContainer',
+      image=image,
+      logging= ecs.AwsLogDriver(        
+        log_group=log_group,
+        stream_prefix='pm-fundamentals'
+      ),
+      environment=env_vars,
+      essential=True)
+
+    sft = ecsp.ScheduledFargateTask(
+      self,'FundamentalsTask',
+      schedule= scale.Schedule.expression(expression='0 0 0 ? * * *'),
+      cluster=self.pm_compute_cluster,
+      desired_task_count=1,
+      scheduled_fargate_task_definition_options= ecsp.ScheduledFargateTaskDefinitionOptions(task_definition=task_definition),
+      subnet_selection=ec2.SubnetSelection(subnet_group_name='PortfolioMgmt'),
+      vpc=self.vpc)
+
+  def __get_tda_auth(self) -> None:    
     """
     Fetches the OAuth2 values from SSM
     """
@@ -200,6 +262,6 @@ class PortfolioLayer(core.Construct):
     return {
       'TDA_CLIENT_ID':client_id.string_value,
       'TDA_REDIRECT_URI':redirect_uri.string_value,
-      'TDA_SECRET_ID':secret.secret_arn
+      'TDA_SECRET_ID':self.tda_secret.secret_arn
     }
   

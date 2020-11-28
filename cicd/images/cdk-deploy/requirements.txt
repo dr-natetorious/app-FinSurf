@@ -24,3 +24,4 @@ aws_cdk.aws_certificatemanager
 aws_cdk.aws_secretsmanager
 aws_cdk.aws_neptune
 aws_cdk.aws_logs_destinations
+aws_cdk.aws_ecs_patterns
