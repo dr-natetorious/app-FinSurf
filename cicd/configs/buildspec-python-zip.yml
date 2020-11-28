@@ -12,8 +12,8 @@ phases:
       - echo $OUTPUT_PATH
       - echo $PARAM_NAME
       - find /artifacts
-      - aws s3 cp --recursive /artifacts $OUTPUT_PATH
-      - aws ssm put-parameter --name $PARAM_NAME --type String --value $OUTPUT_PATH
+      #- aws s3 cp --recursive /artifacts $OUTPUT_PATH
+      #- aws ssm put-parameter --name $PARAM_NAME --type String --value $OUTPUT_PATH
 artifacts:
   files:
     - "**/*"
