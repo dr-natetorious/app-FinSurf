@@ -11,8 +11,8 @@ phases:
       - zip -r /artifacts/deps.zip .
   post_build:
     commands:
-      - aws s3 cp --recursive /artifacts "s3://$ARTIFACTS_BUCKET/$ARTIFACTS_PREFIX/$CODEBUILD_BUILD_NUMBER"
-      - aws ssm put-parameter --name "/app-finsurf/artifacts/bin/$PROJECT_NAME" --type String --value "s3://$ARTIFACTS_BUCKET/$ARTIFACTS_PREFIX/$CODEBUILD_BUILD_NUMBER"
+      - aws s3 cp --recursive /artifacts $OUTPUT_PATH
+      - aws ssm put-parameter --name $PARAM_NAME --type String --value $OUTPUT_PATH
 artifacts:
   files:
     - "**/*"

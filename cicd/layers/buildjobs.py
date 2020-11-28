@@ -100,6 +100,11 @@ class BuildPythonZip(core.Construct):
       webhook=False
     )
 
+    param_name = '/app-finsurf/artifacts/bin/{}'.format(project_name)
+    output_path = 's3://{}/cicd/{}'.format(
+      context.buckets.artifacts_bucket.bucket_name,
+      project_name)
+
     self.build_project = b.Project(self,'PythonProject',
       project_name=project_name,
       source= self.github_master_source,
@@ -109,9 +114,8 @@ class BuildPythonZip(core.Construct):
           tag=build_image.image_uri.split(':')[-1]),
         environment_variables={
           'APP_DIR':b.BuildEnvironmentVariable(value=app_dir),
-          'PROJECT_NAME': b.BuildEnvironmentVariable(value=project_name),
-          'ARTIFACTS_BUCKET': b.BuildEnvironmentVariable(value=context.buckets.artifacts_bucket.bucket_name),
-          'ARTIFACTS_PREFIX': b.BuildEnvironmentVariable(value='cicd/'+project_name),
+          'PARAM_NAME': b.BuildEnvironmentVariable(value=param_name),
+          'OUTPUT_PATH': b.BuildEnvironmentVariable(value=output_path),
         },
         compute_type=b.ComputeType.SMALL
       ),
