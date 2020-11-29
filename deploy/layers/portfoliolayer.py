@@ -2,6 +2,7 @@
 from reusable.context import InfraContext
 from reusable.proxyfrontend import LambdaProxyConstruct
 from reusable.pythonlambda import PythonLambda
+from reusable.ameritradetask import AmeritradeTask
 import os.path as path
 from aws_cdk import (
   core,
@@ -161,42 +162,14 @@ class PortfolioLayer(core.Construct):
           securityGroups= [self.security_group]).function))
 
   def __configure_monitor(self):
-    task_definition = ecs.FargateTaskDefinition(
-      self,'MonitoringTaskDefinition')
-    
-    image = ecs.ContainerImage.from_docker_image_asset(
-      asset=assets.DockerImageAsset(
-        self,'MonitoringDockerAsset',
-        directory=path.join(src_root_dir,'src/portfolio-mgmt/monitor'),
-        repository_name='finsurf-pm-monitor'))
+    monitoring_definition = AmeritradeTask(
+      self,'MonitoringTask',
+      context=self.context,
+      directory=path.join(src_root_dir,'src/portfolio-mgmt/monitor'),
+      repository_name='finsurf-pm-monitor')
 
-    log_group = logs.LogGroup(
-      self,'MonitoringLogGroup',
-      log_group_name='/finsurf/pm/monitoring',
-      removal_policy=core.RemovalPolicy.DESTROY,
-      retention=logs.RetentionDays.TWO_WEEKS)
+    monitoring_definition.add_kinesis_subscription(stream=self.updates_stream)
 
-    logs.SubscriptionFilter(
-      self,'MonitoringFilter',
-      log_group= log_group,
-      filter_pattern=logs.FilterPattern.any_term('data'),
-      destination=dest.KinesisDestination(
-        stream = self.updates_stream))
-
-    env_vars = {}
-    env_vars.update(self.tda_env_vars)
-    task_definition.add_container(
-      'MonitoringContainer',
-      image=image,
-      logging= ecs.AwsLogDriver(        
-        log_group=log_group,
-        stream_prefix='pm-monitoring'
-      ),
-      environment=env_vars,
-      essential=True)
-
-    self.tda_secret.grant_read(task_definition.task_role)
-    
     self.pm_compute_cluster = ecs.Cluster(self,'Cluster',vpc=self.vpc)
     self.monitoring_svc = ecs.FargateService(
       self,'PortMgmt-Monitoring',
@@ -206,53 +179,27 @@ class PortfolioLayer(core.Construct):
       security_group=self.security_group,
       service_name='finsurf-pm-monitor',
       vpc_subnets=ec2.SubnetSelection(subnet_group_name='PortfolioMgmt'),
-      task_definition=task_definition)
+      task_definition=monitoring_definition.task_definition)
 
   def __configure_fundamentals(self) -> None:
     """
     Configure the daily check for fundamental data data.
     """
-    task_definition = ecs.FargateTaskDefinition(
-      self,'FundamentalsTaskDefinition')
-    self.tda_secret.grant_read(task_definition.task_role)
-    
-    image = ecs.ContainerImage.from_docker_image_asset(
-      asset=assets.DockerImageAsset(
-        self,'FundamentalsDockerAsset',
-        directory=path.join(src_root_dir,'src/portfolio-mgmt/fundamentals'),
-        repository_name='finsurf-pm-fundamentals'))
-    
-    log_group = logs.LogGroup(
-      self,'FundamentalLogGroup',
-      log_group_name='/finsurf/pm/fundamentals',
-      removal_policy=core.RemovalPolicy.DESTROY,
-      retention=logs.RetentionDays.TWO_WEEKS)
+    fundamental_definition = AmeritradeTask(
+      self,'FundamentalTask',
+      context=self.context,
+      directory=path.join(src_root_dir,'src/portfolio-mgmt/fundamentals'),
+      repository_name='finsurf-pm-fundamentals')
 
-    logs.SubscriptionFilter(
-      self,'FunLG-Subscription',
-      log_group= log_group,
-      filter_pattern=logs.FilterPattern.any_term('data'),
-      destination=dest.KinesisDestination(
-        stream = self.updates_stream))
-
-    env_vars = {}
-    env_vars.update(self.tda_env_vars)
-    task_definition.add_container(
-      'FundamentalsContainer',
-      image=image,
-      logging= ecs.AwsLogDriver(        
-        log_group=log_group,
-        stream_prefix='pm-fundamentals'
-      ),
-      environment=env_vars,
-      essential=True)
-
+    fundamental_definition.add_kinesis_subscription(stream=self.updates_stream)
+   
     sft = ecsp.ScheduledFargateTask(
       self,'FundamentalsTask',
       schedule= scale.Schedule.cron(hour="22", minute="0", week_day="2-6"),
       cluster=self.pm_compute_cluster,
       desired_task_count=1,
-      scheduled_fargate_task_definition_options= ecsp.ScheduledFargateTaskDefinitionOptions(task_definition=task_definition),
+      scheduled_fargate_task_definition_options= ecsp.ScheduledFargateTaskDefinitionOptions(
+        task_definition=fundamental_definition.task_definition),
       subnet_selection=ec2.SubnetSelection(subnet_group_name='PortfolioMgmt'),
       vpc=self.vpc)
 
