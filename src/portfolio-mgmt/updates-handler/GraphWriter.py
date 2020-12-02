@@ -33,8 +33,28 @@ class GraphWriter:
     
     if 'service' in message:
       serviceName = message['service']
+      if 'content' in message:
+        logger.warn('expected content node missing')
+        continue
+
       if serviceName == 'QUOTE':
         self.__write_tdquote_message(message)
+      if serviceName == 'FUNDAMENTAL':
+        self.__write_tdfundamental_message(message)
+  
+  def __write_tdfundamental_message(self, message:dict) -> None:
+    for content in message['content']:
+      symbol = content['symbol']
+      v = self.g.V().has('quote','key',symbol)
+      
+      if v == None:
+        v = self.g.addV('fundamental').property('key',symbol)
+
+    data = content[symbol]['fundamental']
+    for key in data.keys()
+      v = v.property(key, data[key])
+
+    v.next()
 
   def __write_tdquote_message(self, message:dict) -> None:
     if 'content' in message:
@@ -42,10 +62,10 @@ class GraphWriter:
       return
 
     timestamp = message['timestamp']
-    for content not in message['content']:
+    for content  in message['content']:
       key = content['key']
       v = self.g.V().has('quote','key',key)
-      
+
       if v == None:
         v = self.g.addV('quote').property('key',key)     
       

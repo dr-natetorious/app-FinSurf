@@ -35,7 +35,7 @@ def fetch_instrument_data(symbols:list):
       projection='fundamental')
     
     send_service_data(
-      serviceName='fundamental',
+      serviceName='FUNDAMENTAL',
       contents=[response])
 
 def send_service_data(serviceName:str, contents:list) -> None:
