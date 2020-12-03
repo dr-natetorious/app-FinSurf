@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import typing
+import builtins
 from reusable.context import InfraContext
 from reusable.proxyfrontend import LambdaProxyConstruct
 from reusable.pythonlambda import PythonLambda
@@ -52,6 +54,7 @@ class AmeritradeTask(core.Construct):
     repository_name:str,
     context:InfraContext,
     log_group_name:str=None,
+    entry_point:typing.Optional[typing.List[builtins.str]] = None,
     **kwargs) -> None:
     """
     Creates the ameritrade container
@@ -64,12 +67,14 @@ class AmeritradeTask(core.Construct):
 
     self.__build_task(
       directory=directory,
+      entry_point=entry_point,
       repository_name=repository_name,
       log_group_name=log_group_name)
 
   def __build_task(self,
     directory:str,
     repository_name:str,
+    entry_point:typing.Optional[typing.List[builtins.str]] = None,
     log_group_name:str=None):
 
     if log_group_name is None:
@@ -95,6 +100,7 @@ class AmeritradeTask(core.Construct):
     self.env_vars.update(self.tda_env_vars)
     task_definition.add_container('DefaultContainer',
       image=image,
+      entry_point=entry_point,
       logging= ecs.AwsLogDriver(
         log_group=self.log_group,
         stream_prefix=repository_name,

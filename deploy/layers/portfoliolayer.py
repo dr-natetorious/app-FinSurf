@@ -40,6 +40,7 @@ class PortfolioLayer(core.Construct):
     self.__configure_gateway()
     self.__configure_monitor()
     self.__configure_fundamentals()
+    self.__configure_quote_collection()
 
   @property
   def updates_handler(self) -> lambda_.Function:
@@ -184,22 +185,66 @@ class PortfolioLayer(core.Construct):
   def __configure_fundamentals(self) -> None:
     """
     Configure the daily check for fundamental data data.
-    """
+    """    
     fundamental_definition = AmeritradeTask(
       self,'FundamentalTask',
       context=self.context,
+      entry_point=[ "/usr/bin/python3", "/app/get_fundamentals.py" ],
       directory=path.join(src_root_dir,'src/portfolio-mgmt/fundamentals'),
       repository_name='finsurf-pm-fundamentals')
 
     fundamental_definition.add_kinesis_subscription(stream=self.updates_stream)
    
+    self.fundamental_svc = ecs.FargateService(
+      self,'FundamentalSvc',
+      cluster=self.pm_compute_cluster,
+      assign_public_ip=False,
+      desired_count=0,
+      security_group=self.security_group,
+      service_name='finsurf-pm-fundamental',
+      vpc_subnets=ec2.SubnetSelection(subnet_group_name='PortfolioMgmt'),
+      task_definition=fundamental_definition.task_definition)
+
     sft = ecsp.ScheduledFargateTask(
       self,'FundamentalsTask',
-      schedule= scale.Schedule.cron(hour="22", minute="0", week_day="2-6"),
+      schedule= scale.Schedule.cron(hour="22", minute="0", week_day="6"),
       cluster=self.pm_compute_cluster,
       desired_task_count=1,
       scheduled_fargate_task_definition_options= ecsp.ScheduledFargateTaskDefinitionOptions(
         task_definition=fundamental_definition.task_definition),
+      subnet_selection=ec2.SubnetSelection(subnet_group_name='PortfolioMgmt'),
+      vpc=self.vpc)
+
+  def __configure_quote_collection(self) -> None:
+    """
+    Configure the daily check for fundamental data data.
+    """    
+    quote_task = AmeritradeTask(
+      self,'QuoteCollectionTask',
+      context=self.context,
+      entry_point=[ "/usr/bin/python3", "/app/get_quotes.py" ],
+      directory=path.join(src_root_dir,'src/portfolio-mgmt/fundamentals'),
+      repository_name='finsurf-pm-quotes')
+
+    quote_task.add_kinesis_subscription(stream=self.updates_stream)
+   
+    self.quotes_svc = ecs.FargateService(
+      self,'QuoteSvc',
+      cluster=self.pm_compute_cluster,
+      assign_public_ip=False,
+      desired_count=0,
+      security_group=self.security_group,
+      service_name='finsurf-pm-quotes',
+      vpc_subnets=ec2.SubnetSelection(subnet_group_name='PortfolioMgmt'),
+      task_definition=quote_task.task_definition)
+
+    sft = ecsp.ScheduledFargateTask(
+      self,'QuoteScheduledTask',
+      schedule= scale.Schedule.cron(hour="22", minute="0", week_day="2-6"),
+      cluster=self.pm_compute_cluster,
+      desired_task_count=1,      
+      scheduled_fargate_task_definition_options= ecsp.ScheduledFargateTaskDefinitionOptions(
+        task_definition=quote_task.task_definition),
       subnet_selection=ec2.SubnetSelection(subnet_group_name='PortfolioMgmt'),
       vpc=self.vpc)
 

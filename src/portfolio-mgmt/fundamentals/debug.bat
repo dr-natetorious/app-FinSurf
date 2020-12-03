@@ -12,5 +12,5 @@
 @SET AWS_REGION=us-west-2
 @SET TDA_SECRET_ID=arn:aws:secretsmanager:us-west-2:581361757134:secret:SecretsLayerTDASECRET4460BB-UMsShhBc3uqf-M1Pzwn
 
-python %base_path%\main.py
+python %base_path%\get_quotes.py
 
