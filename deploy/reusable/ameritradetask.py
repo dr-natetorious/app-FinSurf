@@ -55,6 +55,7 @@ class AmeritradeTask(core.Construct):
     context:InfraContext,
     log_group_name:str=None,
     entry_point:typing.Optional[typing.List[builtins.str]] = None,
+    env_vars:dict={},
     **kwargs) -> None:
     """
     Creates the ameritrade container
@@ -69,12 +70,14 @@ class AmeritradeTask(core.Construct):
       directory=directory,
       entry_point=entry_point,
       repository_name=repository_name,
+      env_vars=env_vars,
       log_group_name=log_group_name)
 
   def __build_task(self,
     directory:str,
     repository_name:str,
     entry_point:typing.Optional[typing.List[builtins.str]] = None,
+    env_vars:dict={},
     log_group_name:str=None):
 
     if log_group_name is None:
@@ -96,8 +99,7 @@ class AmeritradeTask(core.Construct):
       removal_policy=core.RemovalPolicy.DESTROY,
       retention=logs.RetentionDays.TWO_WEEKS)
     
-    self.env_vars = {}
-    self.env_vars.update(self.tda_env_vars)
+    env_vars.update(self.tda_env_vars)
     task_definition.add_container('DefaultContainer',
       image=image,
       entry_point=entry_point,
@@ -105,7 +107,7 @@ class AmeritradeTask(core.Construct):
         log_group=self.log_group,
         stream_prefix=repository_name,
       ),
-      environment=self.env_vars,
+      environment=env_vars,
       essential=True)
 
     self.__task_definition = task_definition

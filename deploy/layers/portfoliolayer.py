@@ -111,7 +111,7 @@ class PortfolioLayer(core.Construct):
   def __configure_ingestion(self)->None:
     self.__updates_stream = k.Stream(self,'PortfolioUpdates',
       encryption=k.StreamEncryption.MANAGED,
-      retention_period=core.Duration.days(1),
+      retention_period=core.Duration.days(7),
       shard_count=1,
       stream_name='portfolio-updates')
 
@@ -218,15 +218,23 @@ class PortfolioLayer(core.Construct):
   def __configure_quote_collection(self) -> None:
     """
     Configure the daily check for fundamental data data.
-    """    
+    """
+    quote_stream = k.Stream(
+      self,'MarketUpdates',
+      encryption= k.StreamEncryption.MANAGED,
+      retention_period=core.Duration.days(7),
+      stream_name='finsurf-market-updates')
+
     quote_task = AmeritradeTask(
       self,'QuoteCollectionTask',
       context=self.context,
       entry_point=[ "/usr/bin/python3", "/app/get_quotes.py" ],
       directory=path.join(src_root_dir,'src/portfolio-mgmt/fundamentals'),
-      repository_name='finsurf-pm-quotes')
-
+      repository_name='finsurf-pm-quotes',
+      env_vars={'QUOTE_STREAM':quote_stream.stream_name})
+    
     quote_task.add_kinesis_subscription(stream=self.updates_stream)
+    quote_stream.grant_write(quote_task.task_definition.task_role)
    
     self.quotes_svc = ecs.FargateService(
       self,'QuoteSvc',
@@ -236,11 +244,11 @@ class PortfolioLayer(core.Construct):
       security_group=self.security_group,
       service_name='finsurf-pm-quotes',
       vpc_subnets=ec2.SubnetSelection(subnet_group_name='PortfolioMgmt'),
-      task_definition=quote_task.task_definition)
+      task_definition=quote_task.task_definition)    
 
     sft = ecsp.ScheduledFargateTask(
       self,'QuoteScheduledTask',
-      schedule= scale.Schedule.cron(hour="22", minute="0", week_day="2-6"),
+      schedule= scale.Schedule.cron(hour="13-22/2", minute="0", week_day="2-6"),
       cluster=self.pm_compute_cluster,
       desired_task_count=1,      
       scheduled_fargate_task_definition_options= ecsp.ScheduledFargateTaskDefinitionOptions(
