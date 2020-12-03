@@ -26,58 +26,22 @@ class GraphWriter:
     self.g = self.graph.traversal().withRemote(self.connection)
 
   def write_td_stream_message(self,message:dict):
-    if 'data' in message:
-      for child in message['data']:
-        self.write_td_stream_message(child)
+    payload:dict = message['data'][0]
+    serviceName:str = payload['service']
+    contents:list = payload['content']
+
+    if serviceName == 'QUOTE':
+      self.write_quote(contents)
       return
     
-    if 'service' in message:
-      serviceName = message['service']
-      if 'content' in message:
-        logger.warn('expected content node missing')
-        continue
-
-      if serviceName == 'QUOTE':
-        self.__write_tdquote_message(message)
-      if serviceName == 'FUNDAMENTAL':
-        self.__write_tdfundamental_message(message)
+    print('Error: Unknown serviceName - {}'.format(serviceName))
   
-  def __write_tdfundamental_message(self, message:dict) -> None:
-    for content in message['content']:
+  def write_quote(self, contents:list):
+    for content in contents:
       symbol = content['symbol']
-      v = self.g.V().has('quote','key',symbol)
-      
-      if v == None:
-        v = self.g.addV('fundamental').property('key',symbol)
 
-    data = content[symbol]['fundamental']
-    for key in data.keys()
-      v = v.property(key, data[key])
-
-    v.next()
-
-  def __write_tdquote_message(self, message:dict) -> None:
-    if 'content' in message:
-      logger.warn('expected content node missing')
-      return
-
-    timestamp = message['timestamp']
-    for content  in message['content']:
-      key = content['key']
-      v = self.g.V().has('quote','key',key)
-
-      if v == None:
-        v = self.g.addV('quote').property('key',key)     
-      
-      # Set additional properties
-      v = v.property('timestamp',timestamp)
-      if '1' in content:
-        v = v.property('bid',content['1'])
-      if '2' in content:
-        v = v.property('ask',content['2'])
-      if '3' in content:
-        v = v.property('last',content['3'])
-      if '8' in content:
-        v = v.property('volume',content['3'])
-
-      v.next()
+      print('Get or creating {}'.format(symbol))
+      symbol_v = self.g.V().has('instrument','symbol',symbol).fold().coalesce(
+        __.unfold(),
+        __.addV('instrument').property('symbol',symbol)).next()
+      print('Complete {}'.format(symbol_v))

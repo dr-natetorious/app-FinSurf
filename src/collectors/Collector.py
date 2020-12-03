@@ -89,6 +89,10 @@ def fetch_quotes_data(symbols:list):
     try:
       contents = list(response.values())
     except KeyError:
+      print('KeyError for batch - {}'.format(instruments))
+      continue
+    except AttributeError:
+      print('AttributeError for batch - {}'.format(instruments))
       continue
 
     send_service_data(
@@ -111,13 +115,14 @@ def send_service_data(serviceName:str, contents:list) -> None:
     ]
   })
 
+  # TODO: Is this causing double wrapping in GraphBuilder
   data = b64encode(bytes(message,'utf-8'))
 
   print('Sending[{}]: {} base64 bytes'.format(stream_name,len(data)))
   response = kinesis.put_record(
     StreamName= stream_name,
     Data=data,
-    PartitionKey= str(uuid1)
+    PartitionKey= str(uuid1())
   )
 
   print('Response: {}'.format(dumps(response)))

@@ -35,7 +35,7 @@ class MarketGraphLayer(core.Construct):
     self.__context = context
     self.__vpc = context.networking.vpc
     self.__configure_neptune()
-    #self.__configure_ingestion()
+    self.__configure_ingestion()
 
   @property
   def updates_handler(self) -> lambda_.Function:
