@@ -5,12 +5,17 @@ from json import dumps
 from logging import getLogger
 from time import sleep
 from ratelimitqueue import RateLimitQueue
-import click
+import boto3
+from os import environ
+from base64 import b64encode
+from uuid import uuid1
 
 logger = getLogger()
 factory = ClientFactory()
 tdclient = factory.create_client()
 max_calls = 60 # maximum is 120
+kinesis = boto3.client('kinesis')
+stream_name = environ.get('STREAM_NAME')
 
 def fetch_all_instruments(assetTypes:list):
   """
@@ -74,6 +79,7 @@ def fetch_quotes_data(symbols:list):
 
   while queue.qsize() > 0:
     instruments = queue.get()
+    print('Processing batch {}'.format(instruments))
     
     # Submit the fundamental data
     response = tdclient.get_quotes(
@@ -96,14 +102,25 @@ def send_service_data(serviceName:str, contents:list) -> None:
     logger.warn('empty list given to send_service_data')
     return
 
-  print(dumps({
+  message = dumps({
     'data':[
       {
         'service':serviceName,
         'content':contents
       }
     ]
-  }))
+  })
+
+  data = b64encode(bytes(message,'utf-8'))
+
+  print('Sending[{}]: {} base64 bytes'.format(stream_name,len(data)))
+  response = kinesis.put_record(
+    StreamName= stream_name,
+    Data=data,
+    PartitionKey= str(uuid1)
+  )
+
+  print('Response: {}'.format(dumps(response)))
 
 def chunks(lst, n):
   """Yield successive n-sized chunks from lst."""

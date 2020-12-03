@@ -27,7 +27,7 @@ src_root_dir = path.join(path.dirname(__file__),"../..")
 
 class CollectorLayer(core.Construct):
   """
-  Configure the portfolio management layer
+  Configure the data collections layer
   """
   def __init__(self, scope: core.Construct, id: str, context:InfraContext, **kwargs) -> None:
     super().__init__(scope, id, **kwargs)
@@ -40,8 +40,12 @@ class CollectorLayer(core.Construct):
     self.__configure_quote_collection()
 
   @property
-  def updates_stream(self) -> k.Stream:
-    return self.__updates_stream
+  def quotes_stream(self) -> k.Stream:
+    return self.__quotes_stream
+
+  @property
+  def fundamental_stream(self) -> k.Stream:
+    return self.__fundamental_stream
 
   @property
   def vpc(self) -> ec2.Vpc:
@@ -63,11 +67,17 @@ class CollectorLayer(core.Construct):
     """
     Setup base dependencies
     """
-    self.__updates_stream = k.Stream(self,'CollectorUpdates',
+    self.__quotes_stream = k.Stream(self,'QuoteStream',
       encryption=k.StreamEncryption.MANAGED,
       retention_period=core.Duration.days(7),
       shard_count=1,
-      stream_name='finsurf-market-updates')
+      stream_name='finsurf-incoming-quotes')
+
+    self.__fundamental_stream = k.Stream(self,'FundamentalStream',
+      encryption=k.StreamEncryption.MANAGED,
+      retention_period=core.Duration.days(7),
+      shard_count=1,
+      stream_name='finsurf-incoming-fundamentals')
 
     self.pm_compute_cluster = ecs.Cluster(self,'Cluster',vpc=self.vpc)
     self.security_group = ec2.SecurityGroup(self,'CollectorComponents',
@@ -84,9 +94,12 @@ class CollectorLayer(core.Construct):
       context=self.context,
       entry_point=[ "/usr/bin/python3", "/app/get_fundamentals.py" ],
       directory=path.join(src_root_dir,'src/collectors'),
-      repository_name='finsurf-pm-fundamentals')
+      repository_name='finsurf-pm-fundamentals',
+      env_vars={'STREAM_NAME':self.quotes_stream.stream_name})
 
-    fundamental_definition.add_kinesis_subscription(stream=self.updates_stream)
+    self.fundamental_stream.grant_write(fundamental_definition.task_definition.task_role)
+
+    #fundamental_definition.add_kinesis_subscription(stream=self.fundamental_stream
    
     self.fundamental_svc = ecs.FargateService(
       self,'FundamentalSvc',
@@ -95,7 +108,7 @@ class CollectorLayer(core.Construct):
       desired_count=0,
       security_group=self.security_group,
       service_name='finsurf-pm-fundamental',
-      vpc_subnets=ec2.SubnetSelection(subnet_group_name='PortfolioMgmt'),
+      vpc_subnets=ec2.SubnetSelection(subnet_group_name='Collections'),
       task_definition=fundamental_definition.task_definition)
 
     sft = ecsp.ScheduledFargateTask(
@@ -105,48 +118,42 @@ class CollectorLayer(core.Construct):
       desired_task_count=1,
       scheduled_fargate_task_definition_options= ecsp.ScheduledFargateTaskDefinitionOptions(
         task_definition=fundamental_definition.task_definition),
-      subnet_selection=ec2.SubnetSelection(subnet_group_name='PortfolioMgmt'),
+      subnet_selection=ec2.SubnetSelection(subnet_group_name='Collections'),
       vpc=self.vpc)
 
   def __configure_quote_collection(self) -> None:
     """
     Configure the daily check for fundamental data data.
     """
-    quote_stream = k.Stream(
-      self,'MarketUpdates',
-      encryption= k.StreamEncryption.MANAGED,
-      retention_period=core.Duration.days(7),
-      stream_name='finsurf-market-updates')
-
     quote_task = AmeritradeTask(
       self,'QuoteCollectionTask',
       context=self.context,
       entry_point=[ "/usr/bin/python3", "/app/get_quotes.py" ],
       directory=path.join(src_root_dir,'src/collectors'),
-      repository_name='finsurf-pm-quotes',
-      env_vars={'QUOTE_STREAM':quote_stream.stream_name})
+      repository_name='finsurf-incoming-quotes',
+      env_vars={'STREAM_NAME':self.quotes_stream.stream_name})
     
-    quote_task.add_kinesis_subscription(stream=self.updates_stream)
-    quote_stream.grant_write(quote_task.task_definition.task_role)
+    #quote_task.add_kinesis_subscription(stream=self.quotes_stream)
+    self.quotes_stream.grant_write(quote_task.task_definition.task_role)
    
     self.quotes_svc = ecs.FargateService(
       self,'QuoteSvc',
       cluster=self.pm_compute_cluster,
       assign_public_ip=False,
-      desired_count=0,
+      desired_count=1,
       security_group=self.security_group,
-      service_name='finsurf-pm-quotes',
-      vpc_subnets=ec2.SubnetSelection(subnet_group_name='PortfolioMgmt'),
+      service_name='finsurf-incoming-quotes',
+      vpc_subnets=ec2.SubnetSelection(subnet_group_name='Collections'),
       task_definition=quote_task.task_definition)    
 
     sft = ecsp.ScheduledFargateTask(
       self,'QuoteScheduledTask',
-      schedule= scale.Schedule.cron(hour="13-22/2", minute="0", week_day="2-6"),
+      schedule= scale.Schedule.cron(hour="13-22/4", minute="30", week_day="6"), #week_day="2-6"),
       cluster=self.pm_compute_cluster,
       desired_task_count=1,      
       scheduled_fargate_task_definition_options= ecsp.ScheduledFargateTaskDefinitionOptions(
         task_definition=quote_task.task_definition),
-      subnet_selection=ec2.SubnetSelection(subnet_group_name='PortfolioMgmt'),
+      subnet_selection=ec2.SubnetSelection(subnet_group_name='Collections'),
       vpc=self.vpc)
 
   def __get_tda_auth(self) -> None:    

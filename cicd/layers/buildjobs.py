@@ -78,7 +78,14 @@ class BuildJobLayer(core.Construct):
           build_image = context.build_images.python_build,
           build_role=self.build_role,
           app_dir='src/portfolio-mgmt/pmapi'),
-    }    
+      'FinSurf-GraphBuilder':
+        BuildPythonZip(self,'GraphBuilder',
+          project_name='FinSurf-GraphBuilder',
+          context=context,
+          build_image = context.build_images.python_build,
+          build_role=self.build_role,
+          app_dir='src/graphbuilder'),
+    }
 
 class BuildPythonZip(core.Construct):
   """

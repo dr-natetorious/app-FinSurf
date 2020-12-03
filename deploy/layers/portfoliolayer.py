@@ -3,6 +3,7 @@ from reusable.context import InfraContext
 from reusable.proxyfrontend import LambdaProxyConstruct
 from reusable.pythonlambda import PythonLambda
 from reusable.ameritradetask import AmeritradeTask
+from layers.collectorlayer import CollectorLayer
 import os.path as path
 from aws_cdk import (
   core,
@@ -38,9 +39,6 @@ class PortfolioLayer(core.Construct):
     self.__configure_neptune()
     self.__configure_ingestion()
     self.__configure_gateway()
-    #self.__configure_monitor()
-    #self.__configure_fundamentals()
-    #self.__configure_quote_collection()
 
   @property
   def updates_handler(self) -> lambda_.Function:
@@ -55,12 +53,16 @@ class PortfolioLayer(core.Construct):
     return self.__vpc
 
   @property
-  def tda_secret(self) -> sm.Secret:
-    return self.__tda_secret
-
-  @property
   def context(self) -> InfraContext:
     return self.__context
+
+  @property
+  def collectorlayer(self) -> CollectorLayer:
+    return self.__context.collectors
+
+  @property
+  def tda_secret(self) -> sm.Secret:
+    return self.__tda_secret
 
   @property
   def tda_env_vars(self)->dict:
@@ -182,80 +184,6 @@ class PortfolioLayer(core.Construct):
       vpc_subnets=ec2.SubnetSelection(subnet_group_name='PortfolioMgmt'),
       task_definition=monitoring_definition.task_definition)
 
-  def __configure_fundamentals(self) -> None:
-    """
-    Configure the daily check for fundamental data data.
-    """    
-    fundamental_definition = AmeritradeTask(
-      self,'FundamentalTask',
-      context=self.context,
-      entry_point=[ "/usr/bin/python3", "/app/get_fundamentals.py" ],
-      directory=path.join(src_root_dir,'src/portfolio-mgmt/fundamentals'),
-      repository_name='finsurf-pm-fundamentals')
-
-    fundamental_definition.add_kinesis_subscription(stream=self.updates_stream)
-   
-    self.fundamental_svc = ecs.FargateService(
-      self,'FundamentalSvc',
-      cluster=self.pm_compute_cluster,
-      assign_public_ip=False,
-      desired_count=0,
-      security_group=self.security_group,
-      service_name='finsurf-pm-fundamental',
-      vpc_subnets=ec2.SubnetSelection(subnet_group_name='PortfolioMgmt'),
-      task_definition=fundamental_definition.task_definition)
-
-    sft = ecsp.ScheduledFargateTask(
-      self,'FundamentalsTask',
-      schedule= scale.Schedule.cron(hour="22", minute="0", week_day="6"),
-      cluster=self.pm_compute_cluster,
-      desired_task_count=1,
-      scheduled_fargate_task_definition_options= ecsp.ScheduledFargateTaskDefinitionOptions(
-        task_definition=fundamental_definition.task_definition),
-      subnet_selection=ec2.SubnetSelection(subnet_group_name='PortfolioMgmt'),
-      vpc=self.vpc)
-
-  def __configure_quote_collection(self) -> None:
-    """
-    Configure the daily check for fundamental data data.
-    """
-    quote_stream = k.Stream(
-      self,'MarketUpdates',
-      encryption= k.StreamEncryption.MANAGED,
-      retention_period=core.Duration.days(7),
-      stream_name='finsurf-market-updates')
-
-    quote_task = AmeritradeTask(
-      self,'QuoteCollectionTask',
-      context=self.context,
-      entry_point=[ "/usr/bin/python3", "/app/get_quotes.py" ],
-      directory=path.join(src_root_dir,'src/portfolio-mgmt/fundamentals'),
-      repository_name='finsurf-pm-quotes',
-      env_vars={'QUOTE_STREAM':quote_stream.stream_name})
-    
-    quote_task.add_kinesis_subscription(stream=self.updates_stream)
-    quote_stream.grant_write(quote_task.task_definition.task_role)
-   
-    self.quotes_svc = ecs.FargateService(
-      self,'QuoteSvc',
-      cluster=self.pm_compute_cluster,
-      assign_public_ip=False,
-      desired_count=0,
-      security_group=self.security_group,
-      service_name='finsurf-pm-quotes',
-      vpc_subnets=ec2.SubnetSelection(subnet_group_name='PortfolioMgmt'),
-      task_definition=quote_task.task_definition)    
-
-    sft = ecsp.ScheduledFargateTask(
-      self,'QuoteScheduledTask',
-      schedule= scale.Schedule.cron(hour="13-22/2", minute="0", week_day="2-6"),
-      cluster=self.pm_compute_cluster,
-      desired_task_count=1,      
-      scheduled_fargate_task_definition_options= ecsp.ScheduledFargateTaskDefinitionOptions(
-        task_definition=quote_task.task_definition),
-      subnet_selection=ec2.SubnetSelection(subnet_group_name='PortfolioMgmt'),
-      vpc=self.vpc)
-
   def __get_tda_auth(self) -> None:    
     """
     Fetches the OAuth2 values from SSM
@@ -271,4 +199,3 @@ class PortfolioLayer(core.Construct):
       'TDA_REDIRECT_URI':redirect_uri.string_value,
       'TDA_SECRET_ID':self.tda_secret.secret_arn
     }
-  
