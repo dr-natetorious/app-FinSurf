@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 import typing
 import builtins
-from reusable.context import InfraContext
-from reusable.proxyfrontend import LambdaProxyConstruct
-from reusable.pythonlambda import PythonLambda
+from infra.reusable.context import InfraContext
+from infra.reusable.proxyfrontend import LambdaProxyConstruct
+from infra.reusable.pythonlambda import PythonLambda
 import os.path as path
 from aws_cdk import (
   core,

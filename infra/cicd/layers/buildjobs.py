@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 import os
-from context import BuildContext
-from layers.buckets import BucketLayer
-from layers.images import BuildImagesLayer
+from infra.cicd.context import BuildContext
+from infra.cicd.layers.buckets import BucketLayer
+from infra.cicd.layers.images import BuildImagesLayer
 from aws_cdk import (
   core,
   aws_codebuild as b,

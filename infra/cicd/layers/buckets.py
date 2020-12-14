@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import os
-from context import BuildContext
+from infra.cicd.context import BuildContext
 from aws_cdk import (
   core,
   aws_s3 as s3,

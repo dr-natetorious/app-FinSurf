@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import typing
-from reusable.context import InfraContext
+from infra.reusable.context import InfraContext
 from aws_cdk import (
   core,
   aws_s3 as s3,

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from reusable.context import InfraContext
+from infra.reusable.context import InfraContext
 from aws_cdk import (
     aws_ec2 as ec2,
     aws_route53 as dns,
@@ -30,6 +30,7 @@ class BaseNetworkingLayer(core.Construct):
         ec2.SubnetConfiguration(name='PortfolioMgmt',subnet_type= ec2.SubnetType.PRIVATE, cidr_mask=24),
         ec2.SubnetConfiguration(name='Collections',subnet_type= ec2.SubnetType.PRIVATE, cidr_mask=24),
         ec2.SubnetConfiguration(name='MarketGraph',subnet_type= ec2.SubnetType.PRIVATE, cidr_mask=24),
+        #ec2.SubnetConfiguration(name='MapReduce',subnet_type= ec2.SubnetType.PRIVATE, cidr_mask=24),
       ]
     )
 

@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-from reusable.context import InfraContext
-from reusable.pythonlambda import PythonLambda
-
-from layers.earnings_api import EarningsApiLayer
+from infra.reusable.context import InfraContext
+from infra.reusable.pythonlambda import PythonLambda
+from infra.layers.earnings_api import EarningsApiLayer
 from aws_cdk import (
   core,
   aws_s3 as s3,

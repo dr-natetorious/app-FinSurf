@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-from reusable.context import InfraContext
-from reusable.proxyfrontend import LambdaProxyConstruct
-from reusable.pythonlambda import PythonLambda
-from reusable.ameritradetask import AmeritradeTask
+from infra.reusable.context import InfraContext
+from infra.reusable.proxyfrontend import LambdaProxyConstruct
+from infra.reusable.pythonlambda import PythonLambda
+from infra.reusable.ameritradetask import AmeritradeTask
 import os.path as path
 from aws_cdk import (
   core,

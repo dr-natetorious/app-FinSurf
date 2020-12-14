@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-from reusable.context import InfraContext
-from reusable.pythonlambda import PythonLambda
-from reusable.proxyfrontend import LambdaProxyConstruct
+from infra.reusable.context import InfraContext
+from infra.reusable.pythonlambda import PythonLambda
+from infra.reusable.proxyfrontend import LambdaProxyConstruct
 from aws_cdk import (
   core,
   aws_s3 as s3,

@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 import os.path
-from context import BuildContext
+from infra.cicd.context import BuildContext
 from aws_cdk.core import App, Stack, Environment
-from layers.images import BuildImagesLayer
-from layers.buckets import BucketLayer
-from layers.kms import KeyLayer
-from layers.pipeline import CodePipelineLayer
-from layers.buildjobs import BuildJobLayer
+from infra.cicd.layers.images import BuildImagesLayer
+from infra.cicd.layers.buckets import BucketLayer
+from infra.cicd.layers.kms import KeyLayer
+from infra.cicd.layers.pipeline import CodePipelineLayer
+from infra.cicd.layers.buildjobs import BuildJobLayer
 src_root_dir = os.path.join(os.path.dirname(__file__),"..")
 
 default_env= Environment(region="us-west-2")
 
-def create_infra_stack(infra_stack):
+def create_cicd_stack(infra_stack):
   context = BuildContext(env=default_env)
   context.encryption_keys = KeyLayer(infra_stack, 'EncryptionKeys')
   context.build_images = BuildImagesLayer(infra_stack, 'BuildImages')
@@ -21,6 +21,6 @@ def create_infra_stack(infra_stack):
 
 app = App()
 infra_stack = Stack(app,'FinSurfBuilder', env=default_env)
-create_infra_stack(infra_stack)
+create_cicd_stack(infra_stack)
 
 app.synth()

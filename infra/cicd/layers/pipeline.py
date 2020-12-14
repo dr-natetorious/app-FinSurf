@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 import os
-from context import BuildContext
-from layers.buckets import BucketLayer
-from layers.buildjobs import BuildJobLayer
+from infra.cicd.context import BuildContext
+from infra.cicd.layers.buckets import BucketLayer
+from infra.cicd.layers.buildjobs import BuildJobLayer
 from aws_cdk import (
   core,
   aws_iam as iam,

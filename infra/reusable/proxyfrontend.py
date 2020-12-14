@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from reusable.context import InfraContext
+from infra.reusable.context import InfraContext
 from aws_cdk import (
   core,
   aws_apigateway as a,
