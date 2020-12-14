@@ -39,9 +39,29 @@ class GraphWriter:
   def write_quote(self, contents:list):
     for content in contents:
       symbol = content['symbol']
+      exchangeName = content['exchangeName']
+      trade_time = datetime.utcfromtimestamp(content['tradeTimeInLong'] / 1000)
+      trade_session = "{:04d}-{:02d}-{:02d}".format(
+        trade_time.year,
+        trade_time.month,
+        trade_time.day)
 
-      print('Get or creating {}'.format(symbol))
-      symbol_v = self.g.V().has('instrument','symbol',symbol).fold().coalesce(
+      print('Processing {}'.format(symbol))
+      symbol_v = self.get_or_create_vertice('instrument','symbol',symbol)      
+      exchange_v = self.get_or_create_vertice('exchange','name',exchangeName)
+      self.get_or_create_edge(exchange_v,symbol_v,'transacts')
+
+      trading_session_v = self.get_or_create_vertice('trading_session','session',trade_session)
+      self.get_or_create_edge(symbol_v,trading_session_v,'trades-during')
+
+  def get_or_create_vertice(self,label:str,name:str,value:str):
+    return self.g.V().has(label,name,value).fold().coalesce(
         __.unfold(),
-        __.addV('instrument').property('symbol',symbol)).next()
-      print('Complete {}'.format(symbol_v))
+        __.addV(label).property(name,value)).next()
+
+  def get_or_create_edge(self,v1,v2,label:str):
+    return self.g.V(v1).as_('v1').V(v2).coalesce(
+      __.inE(label).where(
+        __.outV().as_('v1')
+      ),
+      __.addE(label).from_('v1'))
