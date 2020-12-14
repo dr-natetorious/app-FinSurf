@@ -12,12 +12,12 @@ src_root_dir = os.path.join(os.path.dirname(__file__),"..")
 default_env= Environment(region="us-west-2")
 
 def create_infra_stack(infra_stack):
-    context = BuildContext(env=default_env)
-    context.encryption_keys = KeyLayer(infra_stack, 'EncryptionKeys')
-    context.build_images = BuildImagesLayer(infra_stack, 'BuildImages')
-    context.buckets = BucketLayer(infra_stack, 'Buckets', context=context)
-    context.build_projects = BuildJobLayer(infra_stack, 'BuildJobs', context=context)
-    context.pipelines = CodePipelineLayer(infra_stack,'CodePipelines', context=context)
+  context = BuildContext(env=default_env)
+  context.encryption_keys = KeyLayer(infra_stack, 'EncryptionKeys')
+  context.build_images = BuildImagesLayer(infra_stack, 'BuildImages')
+  context.buckets = BucketLayer(infra_stack, 'Buckets', context=context)
+  context.build_projects = BuildJobLayer(infra_stack, 'BuildJobs', context=context)
+  context.pipelines = CodePipelineLayer(infra_stack,'CodePipelines', context=context)
 
 app = App()
 infra_stack = Stack(app,'FinSurfBuilder', env=default_env)
