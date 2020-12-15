@@ -51,6 +51,10 @@ class AccountLinkingClient:
     }
 
     # Translate the code into a access token
+    print('POST {} form {}'.format(
+      client.config['token_endpoint'],
+      data))
+
     token_dict = client._make_request(
       method='post',
       endpoint=client.config['token_endpoint'],
