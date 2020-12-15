@@ -2,16 +2,16 @@
 import os.path
 from infra.reusable.context import InfraContext
 from aws_cdk.core import App, Stack, Environment
-from infra.layers.basenet import BaseNetworkingLayer
-from infra.layers.earnings_api import EarningsApiLayer
-from infra.layers.alexa import AlexaSkillLayer
-from infra.layers.k8s import KubernetesClusterLayer
-from infra.layers.friendlynamed import FriendlyNamedLayer
-from infra.layers.accountlinking import AccountLinkingLayer
-from infra.layers.secrets import SecretsLayer
-from infra.layers.portfoliolayer import PortfolioLayer
-from infra.layers.collectorlayer import CollectorLayer
-from infra.layers.marketgraphlayer import MarketGraphLayer
+from infra.subsys.core.basenet import BaseNetworkingLayer
+from infra.subsys.frontend.earnings_api import EarningsApiLayer
+from infra.subsys.frontend.alexa import AlexaSkillLayer
+from infra.subsys.core.k8s import KubernetesClusterLayer
+from infra.subsys.frontend.friendlynamed import FriendlyNamedLayer
+from infra.subsys.frontend.accountlinking import AccountLinkingLayer
+from infra.subsys.core.secrets import SecretsLayer
+from infra.subsys.backend.portfoliolayer import PortfolioLayer
+from infra.subsys.backend.collectorlayer import CollectorLayer
+from infra.subsys.core.marketgraphlayer import MarketGraphLayer
 src_root_dir = os.path.join(os.path.dirname(__file__))
 
 default_env= Environment(region="us-west-2")

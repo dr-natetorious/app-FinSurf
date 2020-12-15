@@ -23,7 +23,7 @@ from aws_cdk import (
   aws_applicationautoscaling as scale,
 )
 
-src_root_dir = path.join(path.dirname(__file__),"../..")
+src_root_dir = path.join(path.dirname(__file__),"../../..")
 
 class CollectorLayer(core.Construct):
   """

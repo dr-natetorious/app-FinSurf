@@ -3,7 +3,7 @@ from infra.reusable.context import InfraContext
 from infra.reusable.proxyfrontend import LambdaProxyConstruct
 from infra.reusable.pythonlambda import PythonLambda
 from infra.reusable.ameritradetask import AmeritradeTask
-from infra.layers.collectorlayer import CollectorLayer
+from infra.subsys.backend.collectorlayer import CollectorLayer
 import os.path as path
 from aws_cdk import (
   core,
