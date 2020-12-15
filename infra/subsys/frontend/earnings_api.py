@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from infra.reusable.context import InfraContext
-from infra.reusable.pythonlambda import PythonLambda
+from infra.reusable.containerlambda import ContainerLambda
 from infra.reusable.proxyfrontend import LambdaProxyConstruct
 from aws_cdk import (
   core,
@@ -22,10 +22,10 @@ class EarningsApiLayer(core.Construct):
   def __init__(self, scope: core.Construct, id: str, context:InfraContext, **kwargs) -> None:
     super().__init__(scope, id, **kwargs)
 
-    python_lambda = PythonLambda(self,'FlaskFunction',
-      build_prefix='artifacts/Earnings-DataServices',
+    python_lambda = ContainerLambda(self,'EarningsFunction',
+      directory='src/earnings',
       subnet_group_name='EarningApi',
-      handler='handler.app',
+      repository_name='finsurf-lambda-container_earnings',
       context=context)
 
     self.flask_lambda = python_lambda.function
