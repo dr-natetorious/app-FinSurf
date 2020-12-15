@@ -21,6 +21,7 @@ class AccountLinkingLayer(core.Construct):
     super().__init__(scope, id, **kwargs)
       
     self.python_lambda = ContainerLambda(self,'AccountLinking',
+      repository_name='finsurf-lambda-container_accountlinking',
       directory='src/account-linking',
       subnet_group_name='AccountLinking',
       context=context)
