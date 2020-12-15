@@ -24,7 +24,10 @@ class AccountLinkingClient:
 
     self.client_id=client_id
     self.redirect_uri=redirect_uri
-    self.client = TDClient(client_id=client_id, redirect_uri=redirect_uri)
+
+  @property
+  def client(self):
+    return TDClient(client_id=self.client_id, redirect_uri=self.redirect_uri)
 
   def create_credentials_from_urlcode(self, url_code:str) -> dict:
     """
@@ -33,7 +36,10 @@ class AccountLinkingClient:
     if url_code is None:
       raise AssertionError('url_code is not available')
 
-    client = TDClient(client_id=self.client_id, redirect_uri=self.redirect_uri)
+    client = TDClient(
+      client_id=self.client_id,
+      redirect_uri=self.redirect_uri,
+      credentials_path="/tmp/creds.json")
 
     # Define the parameters of our access token post.
     data = {
