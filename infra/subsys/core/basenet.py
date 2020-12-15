@@ -30,7 +30,7 @@ class BaseNetworkingLayer(core.Construct):
         ec2.SubnetConfiguration(name='PortfolioMgmt',subnet_type= ec2.SubnetType.PRIVATE, cidr_mask=24),
         ec2.SubnetConfiguration(name='Collections',subnet_type= ec2.SubnetType.PRIVATE, cidr_mask=24),
         ec2.SubnetConfiguration(name='MarketGraph',subnet_type= ec2.SubnetType.PRIVATE, cidr_mask=24),
-        #ec2.SubnetConfiguration(name='MapReduce',subnet_type= ec2.SubnetType.PRIVATE, cidr_mask=24),
+        ec2.SubnetConfiguration(name='MapReduce',subnet_type= ec2.SubnetType.PRIVATE, cidr_mask=24),
       ]
     )
 

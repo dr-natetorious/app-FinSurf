@@ -11,7 +11,9 @@ from infra.subsys.frontend.accountlinking import AccountLinkingLayer
 from infra.subsys.core.secrets import SecretsLayer
 from infra.subsys.backend.portfoliolayer import PortfolioLayer
 from infra.subsys.backend.collectorlayer import CollectorLayer
-from infra.subsys.core.marketgraphlayer import MarketGraphLayer
+from infra.subsys.storage.marketgraphlayer import MarketGraphLayer
+from infra.subsys.storage.emr import MapReduceLayer
+
 src_root_dir = os.path.join(os.path.dirname(__file__))
 
 default_env= Environment(region="us-west-2")
@@ -26,6 +28,7 @@ def create_infra_stack(infra_stack):
   AccountLinkingLayer(infra_stack, 'AccountLinking', context=context)
   context.collectors = CollectorLayer(infra_stack,'Collections', context=context)
   MarketGraphLayer(infra_stack,'MarketGraph', context=context)
+  MapReduceLayer(infra_stack,'MapReduce', context=context)
 
 app = App()
 infra_stack = Stack(app,'FinSurf', env=default_env)
