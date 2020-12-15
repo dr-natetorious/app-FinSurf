@@ -4,6 +4,10 @@ import time
 from json import dumps
 from datetime import datetime
 from os import environ
+from logging import getLogger
+import requests
+
+logger = getLogger(__name__)
 
 class AccountLinkingClient:
   """
@@ -25,21 +29,12 @@ class AccountLinkingClient:
     self.client_id=client_id
     self.redirect_uri=redirect_uri
 
-  @property
-  def client(self):
-    return TDClient(client_id=self.client_id, redirect_uri=self.redirect_uri)
-
   def create_credentials_from_urlcode(self, url_code:str) -> dict:
     """
     Creates the contents for a td_state.json credential document.
     """
     if url_code is None:
       raise AssertionError('url_code is not available')
-
-    client = TDClient(
-      client_id=self.client_id,
-      redirect_uri=self.redirect_uri,
-      credentials_path="/tmp/creds.json")
 
     # Define the parameters of our access token post.
     data = {
@@ -50,17 +45,16 @@ class AccountLinkingClient:
       'redirect_uri': self.redirect_uri
     }
 
-    # Translate the code into a access token
-    print('POST {} form {}'.format(
-      client.config['token_endpoint'],
-      data))
+    print({
+      'url':'https://api.tdameritrade.com/v1/oauth2/token',
+      'headers':{'Content-Type':'application/x-www-form-urlencoded'}, 
+      'data':data
+    })
 
-    token_dict = client._make_request(
-      method='post',
-      endpoint=client.config['token_endpoint'],
-      mode='form',
-      data=data
-    )
+    token_dict = requests.post(
+      url='https://api.tdameritrade.com/v1/oauth2/token',
+      headers={'Content-Type':'application/x-www-form-urlencoded'}, 
+      data=data)
 
     if token_dict is None:
       raise AssertionError('Unable to translate the code to token')
