@@ -66,20 +66,22 @@ class MapReduceLayer(core.Construct):
           target_spot_capacity=1,
           instance_type_configs= [
             emr.CfnCluster.InstanceTypeConfigProperty(
-              instance_type='m5.xlarge',
+              instance_type='r6g.2xlarge',
             )
         ]),
         core_instance_fleet= emr.CfnCluster.InstanceFleetConfigProperty(
-          target_spot_capacity=2,
+          target_spot_capacity=3,
           instance_type_configs=[
             emr.CfnCluster.InstanceTypeConfigProperty(
-              instance_type='m5.xlarge',
-              # ebs_configuration=emr.CfnCluster.EbsConfigurationProperty(
-              #   ebs_block_device_configs=emr.CfnCluster.EbsBlockDeviceConfigProperty(
-              #     volume_specification=emr.CfnCluster.VolumeSpecificationProperty(
-              #       size_in_gb=250,
-              #       volume_type='gp3'))
-              # )
+              instance_type='r6g.2xlarge',
+              ebs_configuration= emr.CfnCluster.EbsConfigurationProperty(
+                ebs_block_device_configs=[
+                  emr.CfnCluster.EbsBlockDeviceConfigProperty(
+                  volume_specification=emr.CfnCluster.VolumeSpecificationProperty(
+                    size_in_gb=250,
+                    volume_type='gp2'))
+                ]
+              )
           )
         ]),
         additional_master_security_groups=[self.security_group.security_group_id],
