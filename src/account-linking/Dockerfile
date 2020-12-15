@@ -30,7 +30,7 @@ RUN pip install \
   -r ${FUNCTION_DIR}/requirements.txt
 
 # Multi-stage build: grab a fresh copy of the base image
-FROM python:3.8
+FROM public.ecr.aws/lambda/python:3.8
 
 # Include global arg in this stage of the build
 ARG FUNCTION_DIR
@@ -40,5 +40,5 @@ WORKDIR ${FUNCTION_DIR}
 # Copy in the build image dependencies
 COPY --from=build-image ${FUNCTION_DIR} ${FUNCTION_DIR}
 
-ENTRYPOINT [ "/usr/local/bin/python", "-m", "awslambdaric" ]
+#ENTRYPOINT [ "/usr/local/bin/python", "-m", "awslambdaric" ]
 CMD [ "handler.app" ]

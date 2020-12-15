@@ -22,7 +22,6 @@ class AccountLinkingLayer(core.Construct):
       
     self.python_lambda = ContainerLambda(self,'AccountLinking',
       directory='src/account-linking',
-      handler='handler.app',
       subnet_group_name='AccountLinking',
       context=context)
 

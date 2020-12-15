@@ -20,7 +20,6 @@ class ContainerLambda(core.Construct):
     directory:str,
     subnet_group_name:str,
     context:InfraContext,
-    handler:str,
     securityGroups:typing.Optional[typing.List[ec2.SecurityGroup]]=None,
     **kwargs) -> None:
     super().__init__(scope, id, **kwargs)
