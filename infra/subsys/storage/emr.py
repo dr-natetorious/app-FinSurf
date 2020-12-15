@@ -1,4 +1,5 @@
 import os.path as path
+import jsii
 from infra.reusable.context import InfraContext
 from aws_cdk import (
   core,
@@ -36,16 +37,28 @@ class MapReduceLayer(core.Construct):
     )
 
     # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-elasticmapreduce-instancefleetconfig.html
-    # self.cluster = emr.CfnCluster(self,'MapRed',
-    #   name='FinSurf-MapRed',
-    #   job_flow_role=jobFlowRole.role_name,
-    #   service_role=serviceRole.role_name,
-    #   instances= emr.CfnCluster.JobFlowInstancesConfigProperty(
-    #     master_instance_fleet= emr.CfnCluster.InstanceFleetConfigProperty(
-    #       instance_type_configs= [
-    #         emr.CfnCluster.InstanceTypeConfigProperty(
-    #           instance_type='CORE')
-    #     ]),
-    #     ec2_subnet_ids=[net.subnet_id for net in context.networking.vpc._select_subnet_objects(subnet_group_name='MapReduce')],
-    #   )
-    # )
+    self.cluster = emr.CfnCluster(self,'MapRed',
+      name='FinSurf-MapRed',
+      job_flow_role='EMR_EC2_DefaultRole',#jobFlowRole.role_name,
+      service_role=serviceRole.role_name,
+      release_label='emr-6.2.0',
+      instances= emr.CfnCluster.JobFlowInstancesConfigProperty(
+        hadoop_version='2.4.0',   
+        termination_protected=False,
+        master_instance_fleet= emr.CfnCluster.InstanceFleetConfigProperty(
+          target_spot_capacity=1,
+          instance_type_configs= [
+            emr.CfnCluster.InstanceTypeConfigProperty(
+              instance_type='m5.xlarge',
+            )
+        ]),
+        core_instance_fleet= emr.CfnCluster.InstanceFleetConfigProperty(
+          target_spot_capacity=2,
+          instance_type_configs=[
+            emr.CfnCluster.InstanceTypeConfigProperty(
+              instance_type='m5.xlarge',
+          )
+        ]),
+        ec2_subnet_ids=[net.subnet_id for net in context.networking.vpc._select_subnet_objects(subnet_group_name='MapReduce')],
+      )
+    )
