@@ -12,7 +12,7 @@ from infra.layers.secrets import SecretsLayer
 from infra.layers.portfoliolayer import PortfolioLayer
 from infra.layers.collectorlayer import CollectorLayer
 from infra.layers.marketgraphlayer import MarketGraphLayer
-src_root_dir = os.path.join(os.path.dirname(__file__),"..")
+src_root_dir = os.path.join(os.path.dirname(__file__))
 
 default_env= Environment(region="us-west-2")
 

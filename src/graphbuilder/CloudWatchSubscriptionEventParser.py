@@ -17,7 +17,7 @@ class CloudWatchSubscriptionEventParser:
 
   def from_kinesis_record(self,record:dict) -> dict:
     """
-    CloudWatch to Kinesis sends as gzip(base64(text))
+    CloudWatch to Kinesis sends as base64(gzip(utf8(text)))
     """
     compressed = b64decode(record['kinesis']['data'])
     buf = BytesIO(compressed)

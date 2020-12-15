@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from infra.reusable.context import InfraContext
 from infra.reusable.proxyfrontend import LambdaProxyConstruct
-from infra.reusable.pythonlambda import PythonLambda
+from infra.reusable.containerlambda import ContainerLambda
 
 from aws_cdk import (
   core,
@@ -20,11 +20,11 @@ class AccountLinkingLayer(core.Construct):
   def __init__(self, scope: core.Construct, id: str, context:InfraContext, **kwargs) -> None:
     super().__init__(scope, id, **kwargs)
       
-    self.python_lambda = PythonLambda(self,'AccountLinking',
-      build_prefix='artifacts/FinSurf-Account-Linking',
-      handler='handler.app',
+    self.python_lambda = ContainerLambda(self,'AccountLinking',
+      repository_name='finsurf-lambda-container_accountlinking',
+      directory='src/account-linking',
       subnet_group_name='AccountLinking',
-      context=context)    
+      context=context)
 
     self.frontend_proxy = LambdaProxyConstruct(self,'AccountLinkingAPI',
       handler=self.python_lambda.function,
