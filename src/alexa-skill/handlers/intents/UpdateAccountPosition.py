@@ -19,9 +19,6 @@ class UpdateAccountPositionHandler(AbstractRequestHandler):
     return ask_utils.is_intent_name('UpdateAccountPosition')(handler_input)
 
   def handle(self, handler_input:HandlerInput) -> Response:
-
-    update_type = handler_input.request_envelope.request.
-
     update_type = ask_utils.get_slot_value(handler_input,'update_type')
     symbol = ask_utils.get_slot_value(handler_input,'symbol')
     accountname = ask_utils.get_slot_value(handler_input,'accountname')    
