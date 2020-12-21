@@ -12,8 +12,8 @@ from ask_sdk_core.handler_input import HandlerInput
 from ask_sdk_model import Response
 from ask_sdk_core.exceptions import AskSdkException
 import ask_sdk_core.utils as ask_utils
-from FriendlyNamedClient import FriendlyNamedClient
 
+from clients.FriendlyNamedClient import FriendlyNamedClient
 fnapi = FriendlyNamedClient()
 
 class FetchEarningsByDateHandler(AbstractRequestHandler):
