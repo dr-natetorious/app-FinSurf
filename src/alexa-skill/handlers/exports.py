@@ -8,5 +8,4 @@ request_handlers = [
     FetchEarningsByDateHandler(),
     DescribeMarketConditionHandler(),
     FallbackIntentHandler(),
-    CatchAllExceptionHandler()
 ]

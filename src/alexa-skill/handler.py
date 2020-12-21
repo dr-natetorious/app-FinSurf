@@ -12,12 +12,14 @@ import ask_sdk_core.utils as ask_utils
 
 from handlers.exports import request_handlers
 from interceptors import LoggingRequestInterceptor, LoggingResponseInterceptor
+from handlers.core.errorhandlers import CatchAllExceptionHandler
 
 sb = CustomSkillBuilder(api_client=DefaultApiClient())
 
 for h in request_handlers:
   sb.add_request_handler(h)
 
+sb.add_exception_handler(CatchAllExceptionHandler())
 sb.add_global_response_interceptor(LoggingResponseInterceptor())
 sb.add_global_request_interceptor(LoggingRequestInterceptor())
 
