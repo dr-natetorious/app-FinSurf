@@ -16,13 +16,13 @@ import ask_sdk_core.utils as ask_utils
 from clients.FriendlyNamedClient import FriendlyNamedClient
 fnapi = FriendlyNamedClient()
 
-class FetchEarningsByDateHandler(AbstractRequestHandler):
+class GetEarningsByDateHandler(AbstractRequestHandler):
 
   def __init__(self):
     self.logger = logging.getLogger()
 
   def can_handle(self, handler_input:HandlerInput) -> bool:
-    return ask_utils.is_intent_name('FetchEarningsByDate')(handler_input)
+    return ask_utils.is_intent_name('GetEarningsByDate')(handler_input)
 
   def handle(self, handler_input:HandlerInput) -> Response:
     date = ask_utils.get_slot_value(handler_input,'date')
