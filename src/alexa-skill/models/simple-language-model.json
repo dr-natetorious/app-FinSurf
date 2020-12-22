@@ -1,0 +1,350 @@
+{
+    "interactionModel": {
+        "languageModel": {
+            "invocationName": "fin surf",
+            "modelConfiguration": {
+                "fallbackIntentSensitivity": {
+                    "level": "LOW"
+                }
+            },
+            "intents": [
+                {
+                    "name": "AMAZON.CancelIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.HelpIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.StopIntent",
+                    "samples": []
+                },
+                {
+                    "name": "HelloWorldIntent",
+                    "slots": [],
+                    "samples": [
+                        "hello",
+                        "how are you",
+                        "say hi world",
+                        "say hi",
+                        "hi",
+                        "say hello world",
+                        "say hello"
+                    ]
+                },
+                {
+                    "name": "AMAZON.NavigateHomeIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.FallbackIntent",
+                    "samples": []
+                },
+                {
+                    "name": "GetEarningsByDate",
+                    "slots": [
+                        {
+                            "name": "date",
+                            "type": "AMAZON.DATE"
+                        }
+                    ],
+                    "samples": [
+                        "which earnings are {date}",
+                        "whos is reporting earnings {date}",
+                        "tell me about {date} earnings",
+                        "tell me about earnings {date}",
+                        "tell me about earnings on {date}",
+                        "tell me about earnings for {date}",
+                        "who is reporting earnings on {date}",
+                        "who is reporting earings {date}",
+                        "which company earnings are {date}"
+                    ]
+                },
+                {
+                    "name": "DescribeMarketCondition",
+                    "slots": [],
+                    "samples": [
+                        "give me the market rundown",
+                        "tell me about the market ",
+                        "how are market conditions"
+                    ]
+                },
+                {
+                    "name": "DescribeAccount",
+                    "slots": [
+                        {
+                            "name": "accountname",
+                            "type": "account_type",
+                            "samples": [
+                                "{accountname} portfolio",
+                                "the {accountname} account",
+                                "my {accountname} account"
+                            ]
+                        }
+                    ],
+                    "samples": [
+                        "any changes to my {accountname} account",
+                        "what's happening in my {accountname} account",
+                        "anything i should be aware of in my {accountname} account",
+                        "how is my {accountname} account doing",
+                        "tell me about my {accountname} account"
+                    ]
+                },
+                {
+                    "name": "DescribeAccountPosition",
+                    "slots": [
+                        {
+                            "name": "symbol",
+                            "type": "security_name"
+                        },
+                        {
+                            "name": "accountname",
+                            "type": "account_type"
+                        }
+                    ],
+                    "samples": [
+                        "do I own any {symbol} in my {accountname} account",
+                        "tell me about {symbol} in my {accountname} account",
+                        "how is {symbol} doing in my {accountname} account"
+                    ]
+                },
+                {
+                    "name": "UpdateAccountPosition",
+                    "slots": [
+                        {
+                            "name": "update_type",
+                            "type": "position_update_type",
+                            "samples": [
+                                "{update_type} shares",
+                                "{update_type} more shares",
+                                "{update_type}"
+                            ]
+                        },
+                        {
+                            "name": "symbol",
+                            "type": "security_name"
+                        },
+                        {
+                            "name": "accountname",
+                            "type": "account_type",
+                            "samples": [
+                                "my {accountname} account",
+                                "{accountname} account",
+                                "{accountname}"
+                            ]
+                        }
+                    ],
+                    "samples": [
+                        "can you {update_type} to my {symbol} position",
+                        "{update_type} shares of {symbol}  in my {accountname} ",
+                        "{update_type} shares of {symbol} ",
+                        "{update_type} me {symbol} shares for my {accountname} account",
+                        "{update_type} my {symbol}",
+                        "{update_type} me some {symbol} ",
+                        "{update_type} {symbol} options",
+                        "{update_type} {symbol} shares",
+                        "{update_type} {symbol} in my {accountname} account",
+                        "{update_type} more {symbol} for my {accountname} account"
+                    ]
+                }
+            ],
+            "types": [
+                {
+                    "name": "account_type",
+                    "values": [
+                        {
+                            "id": "RETIREMENT",
+                            "name": {
+                                "value": "retirement",
+                                "synonyms": [
+                                    "ira",
+                                    "long term",
+                                    "brokerage"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "UMGA",
+                            "name": {
+                                "value": "umga",
+                                "synonyms": [
+                                    "childs"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "MARGIN",
+                            "name": {
+                                "value": "margin",
+                                "synonyms": [
+                                    "default",
+                                    "trading",
+                                    "short term",
+                                    "primary"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "position_update_type",
+                    "values": [
+                        {
+                            "id": "HEDGE",
+                            "name": {
+                                "value": "hedge",
+                                "synonyms": [
+                                    "offset",
+                                    "protect",
+                                    "reduce exposure",
+                                    "flatten"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "SELL",
+                            "name": {
+                                "value": "sell",
+                                "synonyms": [
+                                    "discard",
+                                    "sell off",
+                                    "dump",
+                                    "short",
+                                    "risk off"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "BUY",
+                            "name": {
+                                "value": "buy",
+                                "synonyms": [
+                                    "long",
+                                    "buy more",
+                                    "risk on",
+                                    "add to",
+                                    "acquire",
+                                    "purchase"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "security_name",
+                    "values": [
+                        {
+                            "id": "MSFT",
+                            "name": {
+                                "value": "MSFT",
+                                "synonyms": [
+                                    "Microsoft"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "AMZN",
+                            "name": {
+                                "value": "AMZN",
+                                "synonyms": [
+                                    "Amazon"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        "dialog": {
+            "intents": [
+                {
+                    "name": "DescribeAccount",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "accountname",
+                            "type": "account_type",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.463653429353.1544181960384"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "UpdateAccountPosition",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "update_type",
+                            "type": "position_update_type",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.1256169220165.1366196235137"
+                            }
+                        },
+                        {
+                            "name": "symbol",
+                            "type": "security_name",
+                            "confirmationRequired": false,
+                            "elicitationRequired": false,
+                            "prompts": {}
+                        },
+                        {
+                            "name": "accountname",
+                            "type": "account_type",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.1256169220165.1282776464019"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "delegationStrategy": "ALWAYS"
+        },
+        "prompts": [
+            {
+                "id": "Elicit.Slot.463653429353.1544181960384",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "are you asking about your primary account"
+                    },
+                    {
+                        "type": "PlainText",
+                        "value": "which account are you asking about"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.1256169220165.1282776464019",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "which account are you updating"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.1256169220165.1366196235137",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "what change are you making to {symbol} ?"
+                    },
+                    {
+                        "type": "PlainText",
+                        "value": "what change are you trying to make"
+                    }
+                ]
+            }
+        ]
+    }
+}
