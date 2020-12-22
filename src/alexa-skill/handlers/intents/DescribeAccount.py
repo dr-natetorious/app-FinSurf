@@ -15,7 +15,7 @@ class DescribeAccountHandler(BaseIntent):
     return ask_utils.is_intent_name('DescribeAccount')(handler_input)
 
   def handle(self, handler_input:HandlerInput) -> Response:
-    accountname = self.get_slot_value(handler_input,'accountname')
+    accountname = self.get_slot(handler_input,'accountname')
 
     text = self.__process(accountname)
     return (
@@ -27,7 +27,7 @@ class DescribeAccountHandler(BaseIntent):
   
   def __process(self, accountname):
     return choice([
-      'Your {} account is up 4% this quarter'.format(accountname),
-      'In your {} account there are four upcoming earning announcements'.format(accountname),
-      'A recent move in Tesla has impacted your {} account by $2500'.format(accountname),
+      'Your {} account is up 4% this quarter'.format(accountname.display_text),
+      'In your {} account there are four upcoming earning announcements'.format(accountname.display_text),
+      'A recent move in Tesla has impacted your {} account by $2500'.format(accountname.display_text),
     ])

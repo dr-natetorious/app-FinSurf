@@ -22,7 +22,8 @@ class FallbackIntentHandler(AbstractRequestHandler):
   def handle(self, handler_input:HandlerInput) -> Response:
     return (
       handler_input.response_builder
-      .speak('oh no! crash.')
+      .speak("I don't know that one")
+      .set_should_end_session(False)
       .response
     )
   
@@ -35,10 +36,11 @@ class CatchAllExceptionHandler(AbstractExceptionHandler):
 
   def handle(self, handler_input:HandlerInput, exception:Exception) -> Response:
     self.logger.error(exception, exc_info=True)
-    self.logger.info(dumps(handler_input))
+    self.logger.error(dumps(handler_input))
 
     return (
       handler_input.response_builder
-      .speak('oh no! crash.')
+      .speak('oh no! crash.' +exception.speech)
+      .set_should_end_session(False)
       .response
     )

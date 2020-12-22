@@ -15,9 +15,9 @@ class UpdateAccountPositionHandler(BaseIntent):
     return ask_utils.is_intent_name('UpdateAccountPosition')(handler_input)
 
   def handle(self, handler_input:HandlerInput) -> Response:
-    update_type = self.get_slot_value(handler_input,'update_type')
-    symbol = self.get_slot_value(handler_input,'symbol')
-    accountname = self.get_slot_value(handler_input,'accountname')
+    update_type = self.get_slot(handler_input,'update_type')
+    symbol = self.get_slot(handler_input,'symbol')
+    accountname = self.get_slot(handler_input,'accountname')
 
     text = self.__process(update_type, symbol, accountname)
     return (
@@ -29,5 +29,5 @@ class UpdateAccountPositionHandler(BaseIntent):
   
   def __process(self, update_type,symbol, accountname):
     return choice([
-      'Sure, we can {} some {} in your {} account'.format(update_type,symbol,accountname),
+      'Sure, we can {} some {} in your {} account'.format(update_type.internal_value,symbol.internal_value,accountname.internal_value),
     ])
