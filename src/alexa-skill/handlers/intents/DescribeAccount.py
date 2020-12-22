@@ -1,29 +1,26 @@
 import logging
-import os
-import requests
 from random import choice
 from json import dumps, loads
-from ask_sdk_core.dispatch_components import AbstractRequestHandler
 from ask_sdk_core.handler_input import HandlerInput
 from ask_sdk_model import Intent,Response, IntentConfirmationStatus, Slot
-from ask_sdk_model.slu.entityresolution import Resolutions, Resolution, ValueWrapper, Value,Status,StatusCode
-from ask_sdk_model.dialog import ElicitSlotDirective
 import ask_sdk_core.utils as ask_utils
+from handlers.intents.BaseIntent import BaseIntent
 
-class DescribeAccountHandler(AbstractRequestHandler):
+class DescribeAccountHandler(BaseIntent):
 
   def __init__(self):
-    self.logger = logging.getLogger()
+    super().__init__()
 
   def can_handle(self, handler_input:HandlerInput) -> bool:
     return ask_utils.is_intent_name('DescribeAccount')(handler_input)
 
   def handle(self, handler_input:HandlerInput) -> Response:
-    accountname = ask_utils.get_slot_value(handler_input,'accountname')
+    accountname = self.get_slot_value(handler_input,'accountname')
 
     text = self.__process(accountname)
     return (
       handler_input.response_builder
+      .set_should_end_session(False)
       .speak(text)
       .response
     )
