@@ -17,7 +17,7 @@ from aws_cdk import (
 
 class AlexaSkillLayer(core.Construct):
   """
-  Configure and deploy the network
+  Configure and deploy the Alexa Skill
   """
   def __init__(self, scope: core.Construct, id: str, context:InfraContext, **kwargs) -> None:
     super().__init__(scope, id, **kwargs)
@@ -27,12 +27,6 @@ class AlexaSkillLayer(core.Construct):
       directory='src/alexa-skill',
       subnet_group_name='Alexa',
       context=context)
-
-    #self.python_lambda = PythonLambda(self,'AlexaSkill',
-    #  build_prefix='artifacts/FinSurf-Alexa-Skill',
-    #  handler='handler.lambda_handler',
-    #  subnet_group_name='Alexa',
-    #  context=context)
 
     self.__build(self.python_lambda.function, context)
 
