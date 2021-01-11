@@ -28,11 +28,11 @@ class HelpTradeStockHandler(BaseIntent):
           <p>
             <amazon:domain name="conversational">
               <voice name="Salli">Just a heads up... {symbol} is being panic sold due to a news event.</voice>
-              <voice name="Matthew">Tell me more</voice>
-              <voice name="Salli">According to WSJ their CEO resigned, but this event is unlikely to change the companies fundamentals.  Would you like to know more?</voice>
-              <voice name="Matthew">No, what is the best trade in {symbol} for my account?</voice>
+              <voice name="Matthew"><break time="200ms"/>Tell me more</voice>
+              <voice name="Salli">According to WSJ was a major service outage, but this event is unlikely to change any fundamentals.  Would you like to know more?</voice>
+              <voice name="Matthew"><break time="200ms"/>No, <break time="200ms"/>what is the best trade in {symbol} for my account?</voice>
               <voice name="Salli">You would have a 74% chance of making $0.75 within 15 days using a skewed iron condor.  This trade comes with a max loss of $3.50.</voice>
-              <voice name="Matthew">Those are pretty good odds, let's two of those</voice>
+              <voice name="Matthew">Those are pretty good odds, let's do two of those</voice>
               <voice name="Salli">
                 Confirmed and sending...<break time="200ms"/>.  Filled <audio src="soundbank://soundlibrary/human/amzn_sfx_crowd_excited_cheer_01"/>
               </voice>
@@ -49,14 +49,14 @@ class HelpTradeStockHandler(BaseIntent):
               <voice name="Matthew">Yes.</voice>
               <voice name="Salli">Are you willing to hold shares in {symbol}?</voice>
               <voice name="Matthew">Yes.</voice>
-              <voice name="Salli">How about we target buying the shares 4% lower within 32 days?  While waiting you'll collect $3.52 in daily interest.</voice>
-              <voice name="Matthew">Explain how that works</voice>
+              <voice name="Salli">How about we target buying the shares 4% lower within 32 days?  While waiting you'll collect $23.52 in daily interest.</voice>
+              <voice name="Matthew"><break time="200ms"/>Explain how that works</voice>
               <voice name="Salli">Essentially you are selling a short term insurance product, called a bullish put spread, for roughly $723.12.</voice>
-              <voice name="Matthew">What if the stock continues going up?</voice>
+              <voice name="Matthew"><break time="200ms"/>What if the stock continues going up?</voice>
               <voice name="Salli">Then the insurance expires worthless and you keep all of the premium payments.</voice>
-              <voice name="Matthew">What if the stock crashes?</voice>
-              <voice name="Salli">If the stock crashes then you might need to buy 100 shares for $152.50 less the insurance payments recieved.</voice>
-              <voice name="Matthew">That sounds like a better deal.  Let's do that.</voice>
+              <voice name="Matthew"><break time="200ms"/>What if the stock crashes?</voice>
+              <voice name="Salli">If the stock crashes then you might need to buy 100 shares for $652.50 less the insurance payments recieved.</voice>
+              <voice name="Matthew"><break time="200ms"/>That sounds like a better deal.  <amazon:emotion name="excited">Let's do that!</amazon:emotion></voice>
               <voice name="Salli">
                 Confirmed and sending...<break time="200ms"/>.  Filled <audio src="soundbank://soundlibrary/human/amzn_sfx_crowd_excited_cheer_01"/>
               </voice>
