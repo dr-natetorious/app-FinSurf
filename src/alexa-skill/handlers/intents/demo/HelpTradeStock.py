@@ -49,7 +49,7 @@ class HelpTradeStockHandler(BaseIntent):
               <voice name="Matthew">Hey Fin Surf, should I buy shares in {symbol}?</voice>
               <voice name="Salli">
                 <amazon:domain name="long-form">
-                  Did you know that through your various ETFs and Mutual-Funds already contain {symbol}?
+                  Did you know that through your various ETFs and Mutual-Funds, you already own {symbol}?
                   Across these positions you have a notional equivalent of $12,532.17 exposure.
                   Are you still interested in purchasing additional shares? 
                 </amazon:domain>
@@ -70,10 +70,10 @@ class HelpTradeStockHandler(BaseIntent):
                 </amazon:domain>
               </voice>
               <voice name="Justin"><break time="300ms"/>That sounds like a better deal.  Let's do that!</voice>
-              <voice name="Salli">I'm sorry you are not authorized to trade in Matthew's account</voice>
-              <voice name="Matthew">Haha, sorry about that. Sure, let's do that Fin Surf</voice>
+              <voice name="Salli">I'm sorry Justin, you are not authorized to trade in Matthew's account</voice>
+              <voice name="Matthew">Wow! That's a cool security feature.  Sure, Fin Surf confirm and send</voice>
               <voice name="Salli">
-                Confirmed and sending...<break time="200ms"/>.  Filled <audio src="soundbank://soundlibrary/human/amzn_sfx_crowd_excited_cheer_01"/>
+                This trade requires an MFA confirmation.  Please accept the push notification sent to your smart phone.<break time="300ms"/>. Confirmation recieved.<break time="100ms"/> Filled <audio src="soundbank://soundlibrary/human/amzn_sfx_crowd_excited_cheer_01"/>
               </voice>
             </amazon:domain>
           </p>
