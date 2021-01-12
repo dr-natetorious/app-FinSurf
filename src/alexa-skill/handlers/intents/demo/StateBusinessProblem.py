@@ -38,7 +38,7 @@ class StateBusinessProblemHandler(BaseIntent):
     """
     return (
       handler_input.response_builder
-      .set_should_end_session(False)
+      .set_should_end_session(True)
       .speak(text)
       .response
     )
