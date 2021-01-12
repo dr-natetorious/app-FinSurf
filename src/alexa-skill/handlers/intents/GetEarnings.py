@@ -12,17 +12,17 @@ from ask_sdk_core.handler_input import HandlerInput
 from ask_sdk_model import Response
 from ask_sdk_core.exceptions import AskSdkException
 import ask_sdk_core.utils as ask_utils
-from FriendlyNamedClient import FriendlyNamedClient
 
+from clients.FriendlyNamedClient import FriendlyNamedClient
 fnapi = FriendlyNamedClient()
 
-class FetchEarningsByDateHandler(AbstractRequestHandler):
+class GetEarningsByDateHandler(AbstractRequestHandler):
 
   def __init__(self):
     self.logger = logging.getLogger()
 
   def can_handle(self, handler_input:HandlerInput) -> bool:
-    return ask_utils.is_intent_name('FetchEarningsByDate')(handler_input)
+    return ask_utils.is_intent_name('GetEarningsByDate')(handler_input)
 
   def handle(self, handler_input:HandlerInput) -> Response:
     date = ask_utils.get_slot_value(handler_input,'date')
@@ -31,6 +31,7 @@ class FetchEarningsByDateHandler(AbstractRequestHandler):
     return (
       handler_input.response_builder
       .speak(text)
+      .set_should_end_session(False)
       .response
     )
   

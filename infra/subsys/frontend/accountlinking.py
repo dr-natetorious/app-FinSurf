@@ -15,7 +15,7 @@ from aws_cdk import (
 
 class AccountLinkingLayer(core.Construct):
   """
-  Configure and deploy the network
+  Configure and deploy the account linking service
   """
   def __init__(self, scope: core.Construct, id: str, context:InfraContext, **kwargs) -> None:
     super().__init__(scope, id, **kwargs)

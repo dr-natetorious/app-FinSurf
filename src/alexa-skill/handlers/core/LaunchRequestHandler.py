@@ -20,10 +20,9 @@ class LaunchRequestHandler(AbstractRequestHandler):
 
   def handle(self, handler_input:HandlerInput) -> Response:
     self.logger.info("In launch handler")
-    builder = handler_input.response_builder
 
-    return (builder
-      .speak('Hey this works')
-      .ask('will codepipeline ever finish')
+    return (handler_input.response_builder
+      .speak('Launching Financial Surfer')
+      .ask('How can I help you')
       .response
     )

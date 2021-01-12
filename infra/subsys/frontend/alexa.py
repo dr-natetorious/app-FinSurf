@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from infra.reusable.context import InfraContext
-from infra.reusable.pythonlambda import PythonLambda
+from infra.reusable.containerlambda import ContainerLambda
 from infra.subsys.frontend.earnings_api import EarningsApiLayer
 from aws_cdk import (
   core,
@@ -17,14 +17,14 @@ from aws_cdk import (
 
 class AlexaSkillLayer(core.Construct):
   """
-  Configure and deploy the network
+  Configure and deploy the Alexa Skill
   """
   def __init__(self, scope: core.Construct, id: str, context:InfraContext, **kwargs) -> None:
     super().__init__(scope, id, **kwargs)
   
-    self.python_lambda = PythonLambda(self,'AlexaSkill',
-      build_prefix='artifacts/FinSurf-Alexa-Skill',
-      handler='handler.lambda_handler',
+    self.python_lambda = ContainerLambda(self,'FinSurf-Skill',
+      repository_name='finsurf-lambda-container_alexaskill',
+      directory='src/alexa-skill',
       subnet_group_name='Alexa',
       context=context)
 
